@@ -1,0 +1,46 @@
+{
+  "name": "temporal-fun",
+  "version": "0.1.0",
+  "description": "Modern temporal date utility library, built for Temporal API",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "temporal",
+    "date",
+    "time",
+    "datetime",
+    "timezone",
+    "duration",
+    "format",
+    "parse",
+    "utility"
+  ],
+  "author": "Anthony Nowell <anthony@howie.ai>",
+  "license": "MIT",
+  "peerDependencies": {
+    "temporal-polyfill": "^0.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0"
+  }
+}
