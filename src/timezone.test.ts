@@ -38,7 +38,7 @@ describe("getTimezoneName()", () => {
     expect(getTimezoneName(utcDate)).toBe("UTC");
     expect(getTimezoneName(nyDate)).toBe("EDT");
     expect(getTimezoneName(londonDate)).toBe("GMT+1");
-    expect(getTimezoneName(londonDate, { locale: "en-GB" })).toBe("BST");
+    expect(getTimezoneName(londonDate, { locales: "en-GB" })).toBe("BST");
   });
 
   it("returns different names for winter vs summer (DST)", () => {
@@ -52,8 +52,8 @@ describe("getTimezoneName()", () => {
   it("respects locale option", () => {
     const nyDate = Zoned.from("2024-07-15T12:00:00[America/New_York]");
 
-    const usResult = getTimezoneName(nyDate, { locale: "en-US" });
-    const frResult = getTimezoneName(nyDate, { locale: "fr-FR" });
+    const usResult = getTimezoneName(nyDate, { locales: "en-US" });
+    const frResult = getTimezoneName(nyDate, { locales: "fr-FR" });
 
     expect(usResult).toBe("EDT");
     expect(frResult).toBe("UTC−4");
@@ -91,7 +91,7 @@ describe("getTimezoneName()", () => {
     const parisDate = Zoned.from("2024-07-15T12:00:00[Europe/Paris]");
 
     const result = getTimezoneName(parisDate, {
-      locale: "fr-FR",
+      locales: "fr-FR",
       style: "long",
     });
 

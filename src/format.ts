@@ -1,4 +1,4 @@
-import { DateLike, PlainDate, PlainTime, TimeLike } from "./types";
+import { DateLike, PlainDate, PlainTime, TimeLike, Zoned } from "./types";
 import {
   isDate,
   isDateLike,
@@ -10,159 +10,7 @@ import {
 } from "./guards";
 import * as config from "./config";
 import { nowZoned, zoned } from "./convert";
-
-// Rather than re-inventing temporal string formatting,
-// we provide consts that cover the most common cases
-// and make it easy to extend with Intl.DateTimeFormatOptions overrides
-//
-//
-// datelike.toString() // RFC 9557 formatted (or RFC 9557 + timezone for Zoned)
-//
-// dateLike.toLocaleString() // default locale format via Temporal API
-// dateLike.toLocaleString("en-US", DateTimeFmt.Short)
-//
-// To extend:
-// const weekdayShort = {...DateFmt.Short, weekday: "short"}
-// dateLike.toLocaleString("en-US", weekdayShort)
-
-export const DateFmt = {
-  // 3/24/25
-  Short: { year: "2-digit", month: "numeric", day: "numeric" },
-  // Mar 24, 2025
-  Medium: { dateStyle: "medium" },
-  // March 24, 2025
-  Long: { dateStyle: "long" },
-} satisfies Record<string, Intl.DateTimeFormatOptions>;
-
-export const TimeFmt = {
-  // 8:30 AM
-  Short12h: { hour: "numeric", minute: "2-digit", hour12: true },
-  // 8:30:05 AM
-  Long12h: {
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  },
-  // 08:30
-  Short24h: { hour: "2-digit", minute: "2-digit", hour12: false },
-  // 08:30:05
-  Long24h: {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-  },
-} satisfies Record<string, Intl.DateTimeFormatOptions>;
-
-export const DateTimeFmt = {
-  // 3/24/25, 8:30 AM
-  Short12h: { dateStyle: "short", timeStyle: "short", hour12: true },
-  // Mar 24, 2025, 8:30 AM
-  Medium12h: { dateStyle: "medium", timeStyle: "short", hour12: true },
-  // March 24, 2025 at 8:30:05 AM
-  Long12h: { dateStyle: "long", timeStyle: "medium", hour12: true },
-  // 3/24/25, 08:30
-  Short24h: { dateStyle: "short", timeStyle: "short", hour12: false },
-  // Mar 24, 2025, 08:30
-  Medium24h: { dateStyle: "medium", timeStyle: "short", hour12: false },
-  // March 24, 2025 at 08:30:05
-  Long24h: { dateStyle: "long", timeStyle: "medium", hour12: false },
-} satisfies Record<string, Intl.DateTimeFormatOptions>;
-
-export const ZonedFmt = {
-  // 3/24/25, 8:30 AM PST
-  Short12h: {
-    year: "2-digit",
-    month: "numeric",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZoneName: "short",
-  },
-  // Mar 24, 2025, 8:30 AM PST
-  Medium12h: {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-    timeZoneName: "short",
-  },
-  // March 24, 2025 at 8:30:05 AM Pacific Standard Time
-  Long12h: {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-    timeZoneName: "long",
-  },
-  // 3/24/25, 08:30 PST
-  Short24h: {
-    year: "2-digit",
-    month: "numeric",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZoneName: "short",
-  },
-  // Mar 24, 2025, 08:30 PST
-  Medium24h: {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-    timeZoneName: "short",
-  },
-  // March 24, 2025 at 08:30:05 Pacific Standard Time
-  Long24h: {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-    timeZoneName: "long",
-  },
-} satisfies Record<string, Intl.DateTimeFormatOptions>;
-
-export const InstantFmt = {
-  // UTC time formatted as short datetime
-  Short: {
-    dateStyle: "short",
-    timeStyle: "short",
-    hour12: false,
-    timeZone: "UTC",
-  },
-  // UTC time formatted as medium datetime
-  Medium: {
-    dateStyle: "medium",
-    timeStyle: "short",
-    hour12: false,
-    timeZone: "UTC",
-  },
-  // UTC time formatted as long datetime with UTC indicator
-  Long: {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: false,
-    timeZone: "UTC",
-    timeZoneName: "short",
-  },
-} satisfies Record<string, Intl.DateTimeFormatOptions>;
+import { getTimezoneName } from "./timezone";
 
 /**
  * Formats the distance from now as a relative time string
@@ -200,68 +48,130 @@ export function fmtRelativeToNow(
   }).format(isPast ? -value : value, unit as Intl.RelativeTimeFormatUnit);
 }
 
-export function fmtShort(
-  dl: DateLike | TimeLike,
-  opts?: { locales?: string | string[]; hour12?: boolean },
-): string {
-  const { locales = config.getLocales(), hour12 = false } = opts || {};
-  let fmt;
-  if (isDateLike(dl)) {
-    if (isDate(dl)) fmt = DateFmt.Short;
-    if (isDateTime(dl))
-      fmt = hour12 ? DateTimeFmt.Short12h : DateTimeFmt.Short24h;
-    if (isZoned(dl)) fmt = hour12 ? ZonedFmt.Short12h : ZonedFmt.Short24h;
-    if (isInstant(dl)) fmt = InstantFmt.Short;
-  }
-  if (isTimeLike(dl)) {
-    if (isTime(dl)) {
-      fmt = hour12 ? TimeFmt.Short12h : TimeFmt.Short24h;
-    }
+// Helper to identify locale-specific separator (if any) to include between the time and timezone components
+//
+// Why? Because we want to format Zoned with a CLDR timeStyle and timezone component
+// - timeStyle="short" doens't render a timezone
+// - CLDR timeStyles can't be used in combination with timeZoneName
+//
+// So instead we format Zoned without the timezone, then get the locale timezone
+// and use this helper to determine any separators to use
+//
+// This works by using formatToParts with a locale-aware hour + timezone format.
+// We then find the timeZoneName component and determine if there is a literal separator part before it.
+function getLocaleTimeZoneJoiner(locales?: string | string[]): string {
+  // Include hour to ensure the timezone actually appears after a time part
+  const parts = new Intl.DateTimeFormat(locales, {
+    hour: "numeric",
+    timeZoneName: "short",
+  }).formatToParts(new Date());
+
+  const tzIndex = parts.findIndex((p) => p.type === "timeZoneName");
+  if (tzIndex === -1) return " "; // fallback
+
+  const preceding = parts[tzIndex - 1];
+  // If the preceding part is a literal that includes whitespace, use that as separator
+  if (preceding?.type === "literal") {
+    return preceding.value;
   }
 
-  return dl.toLocaleString(locales, fmt);
+  return ""; // no separator
+}
+
+export function fmtShort(
+  dl: DateLike | TimeLike,
+  opts?: { locales?: string | string[] },
+): string {
+  const { locales = config.getLocales() } = opts || {};
+
+  const fmtOpts: Intl.DateTimeFormatOptions = {};
+  if (isDateLike(dl)) fmtOpts.dateStyle = "short";
+  if (isTimeLike(dl)) fmtOpts.timeStyle = "short";
+  if (isInstant(dl)) fmtOpts.timeZone = "UTC";
+
+  if (!isZoned(dl)) {
+    return dl.toLocaleString(locales, fmtOpts);
+  }
+
+  const dtString = dl.toLocaleString(locales, fmtOpts);
+  const tzName = getTimezoneName(dl, { locales, style: "short" });
+  return tzName
+    ? [dtString, getLocaleTimeZoneJoiner(locales), tzName].join("")
+    : dtString;
 }
 
 export function fmtMedium(
   dl: DateLike | TimeLike,
-  opts?: { locales?: string | string[]; hour12?: boolean },
+  opts?: { locales?: string | string[] },
 ): string {
-  const { locales = config.getLocales(), hour12 = false } = opts || {};
-  let fmt;
+  const { locales = config.getLocales() } = opts || {};
+  let fmtOpts = {} as Intl.DateTimeFormatOptions;
   if (isDateLike(dl)) {
-    if (isDate(dl)) fmt = DateFmt.Medium;
-    if (isDateTime(dl))
-      fmt = hour12 ? DateTimeFmt.Medium12h : DateTimeFmt.Medium24h;
-    if (isZoned(dl)) fmt = hour12 ? ZonedFmt.Medium12h : ZonedFmt.Medium24h;
-    if (isInstant(dl)) fmt = InstantFmt.Medium;
+    fmtOpts.dateStyle = "medium";
   }
   if (isTimeLike(dl)) {
-    if (isTime(dl)) {
-      fmt = hour12 ? TimeFmt.Short12h : TimeFmt.Short24h; // Medium same as Short for time
-    }
+    fmtOpts.timeStyle = fmtOpts.dateStyle ? "short" : "medium";
+  }
+  if (isInstant(dl)) {
+    fmtOpts.timeZone = "UTC";
   }
 
-  return dl.toLocaleString(locales, fmt);
+  if (!isZoned(dl)) {
+    return dl.toLocaleString(locales, fmtOpts);
+  }
+
+  const dtString = dl.toLocaleString(locales, fmtOpts);
+  const tzName = getTimezoneName(dl, { locales, style: "short" });
+  return tzName
+    ? [dtString, getLocaleTimeZoneJoiner(locales), tzName].join("")
+    : dtString;
 }
 
 export function fmtLong(
   dl: DateLike | TimeLike,
-  opts?: { locales?: string | string[]; hour12?: boolean },
+  opts?: { locales?: string | string[] },
 ): string {
-  const { locales = config.getLocales(), hour12 = false } = opts || {};
-  let fmt;
+  const { locales = config.getLocales() } = opts || {};
+  let fmtOpts = {} as Intl.DateTimeFormatOptions;
   if (isDateLike(dl)) {
-    if (isDate(dl)) fmt = DateFmt.Long;
-    if (isDateTime(dl))
-      fmt = hour12 ? DateTimeFmt.Long12h : DateTimeFmt.Long24h;
-    if (isZoned(dl)) fmt = hour12 ? ZonedFmt.Long12h : ZonedFmt.Long24h;
-    if (isInstant(dl)) fmt = InstantFmt.Long;
+    fmtOpts.dateStyle = "long";
   }
   if (isTimeLike(dl)) {
-    if (isTime(dl)) {
-      fmt = hour12 ? TimeFmt.Long12h : TimeFmt.Long24h;
-    }
+    fmtOpts.timeStyle = fmtOpts.dateStyle ? "short" : "long";
   }
 
-  return dl.toLocaleString(locales, fmt);
+  if (!isZoned(dl) && !isInstant(dl)) {
+    return dl.toLocaleString(locales, fmtOpts);
+  }
+
+  if (isInstant(dl)) {
+    fmtOpts.timeZone = "UTC";
+  }
+
+  const dtString = dl.toLocaleString(locales, fmtOpts);
+  const tzName = isZoned(dl)
+    ? getTimezoneName(dl, { locales, style: "long" })
+    : "UTC";
+  return tzName
+    ? [dtString, getLocaleTimeZoneJoiner(locales), tzName].join("")
+    : dtString;
+}
+
+export function fmtFull(
+  dl: DateLike | TimeLike,
+  opts?: { locales?: string | string[] },
+): string {
+  const { locales = config.getLocales() } = opts || {};
+  let fmtOpts = {} as Intl.DateTimeFormatOptions;
+  if (isDateLike(dl)) {
+    fmtOpts.dateStyle = "full";
+  }
+  if (isTimeLike(dl)) {
+    fmtOpts.timeStyle = "full";
+  }
+  if (isInstant(dl)) {
+    fmtOpts.timeZone = "UTC";
+  }
+
+  return dl.toLocaleString(locales, fmtOpts);
 }

@@ -2,7 +2,7 @@ import * as config from "./config";
 import type { Zoned } from "./types";
 
 export interface TimezoneFormatOptions {
-  locale: Intl.LocalesArgument;
+  locales: Intl.LocalesArgument;
   style: Intl.DateTimeFormatOptions["timeZoneName"];
 }
 
@@ -31,7 +31,7 @@ export function getTimezoneName(
   options?: Partial<TimezoneFormatOptions>,
 ): string | null {
   const defaultOptions: TimezoneFormatOptions = {
-    locale: config.getLocales(),
+    locales: config.getLocales(),
     style: "short",
   };
   const mergedOptions: TimezoneFormatOptions = {
@@ -40,7 +40,7 @@ export function getTimezoneName(
   };
 
   const date = new Date(zonedDateTime.epochMilliseconds);
-  const formatter = new Intl.DateTimeFormat(mergedOptions.locale, {
+  const formatter = new Intl.DateTimeFormat(mergedOptions.locales, {
     timeZone: zonedDateTime.timeZoneId,
     timeZoneName: mergedOptions.style,
   });
