@@ -15,7 +15,7 @@ import { Concrete } from "./internal.js";
 /**
  * Compares two DateLike objects using their constructor's compare method
  */
-export function compareDateLike<T extends DateLike>(
+export function compare<T extends DateLike>(
   a: Concrete<T>,
   b: Concrete<T>,
 ): number {
@@ -31,7 +31,7 @@ export function isBefore<T extends DateLike>(
   a: Concrete<T>,
   b: Concrete<T>,
 ): boolean {
-  return compareDateLike(a, b) < 0;
+  return compare(a, b) < 0;
 }
 
 /**
@@ -41,7 +41,7 @@ export function isEqualOrBefore<T extends DateLike>(
   a: Concrete<T>,
   b: Concrete<T>,
 ): boolean {
-  return compareDateLike(a, b) <= 0;
+  return compare(a, b) <= 0;
 }
 
 /**
@@ -51,7 +51,7 @@ export function isAfter<T extends DateLike>(
   a: Concrete<T>,
   b: Concrete<T>,
 ): boolean {
-  return compareDateLike(a, b) > 0;
+  return compare(a, b) > 0;
 }
 
 /**
@@ -61,7 +61,7 @@ export function isEqualOrAfter<T extends DateLike>(
   a: Concrete<T>,
   b: Concrete<T>,
 ): boolean {
-  return compareDateLike(a, b) >= 0;
+  return compare(a, b) >= 0;
 }
 
 /**
@@ -105,8 +105,8 @@ export function rangesOverlap<T extends DateLike>(
   const inclusive = opts?.inclusive ?? isDate(a[0]);
 
   if (inclusive) {
-    return compareDateLike(a[0], b[1]) <= 0 && compareDateLike(a[1], b[0]) >= 0;
+    return compare(a[0], b[1]) <= 0 && compare(a[1], b[0]) >= 0;
   } else {
-    return compareDateLike(a[0], b[1]) < 0 && compareDateLike(a[1], b[0]) > 0;
+    return compare(a[0], b[1]) < 0 && compare(a[1], b[0]) > 0;
   }
 }

@@ -8,21 +8,7 @@ import {
   DateLike,
   TimeLike,
 } from "./types";
-
-/**
- * Helper to catch errors and return undefined for safe parsing
- */
-function catchAsUndefined<T, Args extends unknown[]>(
-  fn: (...args: Args) => T,
-): (...args: Args) => T | undefined {
-  return (...args: Args) => {
-    try {
-      return fn(...args);
-    } catch {
-      return undefined;
-    }
-  };
-}
+import { safeParse } from "./internal";
 
 /**
  * Detects the type of a string representation of a date/time
@@ -31,49 +17,39 @@ function detectTemporalType(
   dateStr: string,
 ):
   | "plain-date"
+  | "plain-time"
   | "plain-datetime"
   | "zoned-datetime"
   | "instant"
   | "iso-with-offset"
   | "unknown" {
-  try {
-    // Check for instant (ends with Z)
-    if (dateStr.endsWith("Z")) {
-      return "instant";
-    }
-
-    // Check for bracketed timezone (e.g., "[America/New_York]")
-    if (dateStr.includes("[") && dateStr.includes("]")) {
-      return "zoned-datetime";
-    }
-
-    // Check for ISO format with numeric timezone offset (+/-HH:MM)
-    if (dateStr.includes("T") && /[+-]\d{2}:\d{2}$/.test(dateStr)) {
-      return "iso-with-offset";
-    }
-
-    // Check for date + time format without timezone
-    if (
-      dateStr.includes("T") ||
-      (dateStr.includes(" ") && dateStr.length > 10)
-    ) {
-      return "plain-datetime";
-    }
-
-    // Check for simple date format (YYYY-MM-DD)
-    if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
-      return "plain-date";
-    }
-
-    return "unknown";
-  } catch {
-    return "unknown";
+  // Check for instant (ends with Z)
+  if (dateStr.endsWith("Z")) {
+    return "instant";
   }
+
+  // Check for bracketed timezone (e.g., "[America/New_York]")
+  if (dateStr.endsWith("]")) {
+    return "zoned-datetime";
+  }
+
+  // Check for offset
+  // Note: +/- is maby be in date portion (year) or offset
+  if (/[+-]\d{2}:\d{2}$/.test(dateStr)) {
+    return "iso-with-offset";
+  }
+
+  const hasDate = dateStr.includes("-");
+  const hasTime = dateStr.includes(":");
+
+  if (hasDate && hasTime) return "plain-datetime";
+  if (hasDate) return "plain-date";
+  if (hasTime) return "plain-time";
+  return "unknown";
 }
 
 /**
  * Parses a PlainDate string
- * Identical to Temporal.PlainDate.from(input) - provided for consistency
  */
 export function parseDate(input: string): PlainDate {
   return Temporal.PlainDate.from(input);
@@ -81,61 +57,56 @@ export function parseDate(input: string): PlainDate {
 
 /**
  * Parses a PlainDateTime string
- * Unlike Temporal.PlainDateTime.from(), accepts both "T" and space separators between date and time
  */
 export function parseDateTime(input: string): PlainDateTime {
-  return Temporal.PlainDateTime.from(input.replace(" ", "T"));
+  return Temporal.PlainDateTime.from(input);
 }
 
 /**
  * Parses a ZonedDateTime string
  * Unlike Temporal.ZonedDateTime.from(), includes fallback for outdated timezone formats and offset/timezone mismatches
+ * And supports parsing ISO-8601 straight to Zoned (normally Instant)
  */
 export function parseZoned(input: string): Zoned {
   try {
     return Temporal.ZonedDateTime.from(input);
-  } catch {
-    const [, isoPart, timeZone] = input.match(/^(.*?)\[(.+)\]$/) || [];
-    if (!isoPart || !timeZone) {
-      throw new Error(`Invalid ZonedDateTime string: ${input}`);
+  } catch (err) {
+    try {
+      // Fix cases where offset and timezone combination are invalid
+      // This can happen when round-tripping through different versions of the IANA DB with different timezone rules
+      // Parse the ISO 8601 part as an Instant, and then re-apply the timezone (which may adjust the offset)
+      const [, isoPart, timeZone] = input.match(/^(.*?)\[(.+)\]$/) || [];
+      if (isoPart && timeZone) {
+        return Temporal.Instant.from(isoPart).toZonedDateTimeISO(timeZone);
+      }
+
+      // Allow parsing ISO-8601 to Zoned with UTC timezone.
+      return Temporal.Instant.from(input).toZonedDateTimeISO("UTC");
+    } catch {
+      // rethrow the original ZonedDateTime parsing error
+      throw err;
     }
-    return Temporal.Instant.from(isoPart).toZonedDateTimeISO(timeZone);
   }
 }
 
 /**
  * Parses a PlainTime from various formats
- * Unlike Temporal.PlainTime.from(), supports 12-hour format (2:30pm) and decimal hours (9.5)
+ * Unlike Temporal.PlainTime.from(), supports 12-hour format (2:30pm)
  */
 export function parseTime(timeStr: string): PlainTime {
   // Try 12-hour format first (e.g., "2:30pm" or "2:30 pm")
-  if (/^\d{1,2}:\d{2}\s*(am|pm)$/i.test(timeStr)) {
+  if (/(am|pm)$/i.test(timeStr)) {
     return parseTimeFrom12Hour(timeStr);
   }
 
-  // Try decimal hour format (e.g., "9.5" - must be purely numeric with optional decimal)
-  if (/^\d+(\.\d+)?$/.test(timeStr)) {
-    const decimalHour = parseFloat(timeStr);
-    if (decimalHour >= 0 && decimalHour < 24) {
-      const hour = Math.floor(decimalHour);
-      const minute = Math.floor((decimalHour - hour) * 60);
-      const second = Math.floor(((decimalHour - hour) * 60 - minute) * 60);
-      return new PlainTime(hour, minute, second);
-    }
-  }
-
   // Try ISO time format (e.g., "14:30")
-  try {
-    return Temporal.PlainTime.from(timeStr);
-  } catch {
-    throw new Error(`Unable to parse time: ${timeStr}`);
-  }
+  return Temporal.PlainTime.from(timeStr);
 }
 
 /**
  * Parse a PlainTime from 12-hour format string (e.g., "2:30pm")
  */
-export function parseTimeFrom12Hour(time: string): PlainTime {
+function parseTimeFrom12Hour(time: string): PlainTime {
   const match = time.match(/(\d+):(\d+)\s*(am|pm)/i);
   if (!match) {
     throw new Error(`Invalid 12-hour time format: ${time}`);
@@ -162,19 +133,9 @@ export function parseTimeFrom12Hour(time: string): PlainTime {
 
 /**
  * Parses an Instant string
- * Unlike Temporal.Instant.from(), includes fallback to legacy Date parsing for broader compatibility
  */
 export function parseInstant(input: string): Instant {
-  try {
-    return Temporal.Instant.from(input);
-  } catch {
-    // Fallback to Date parsing
-    const date = new Date(input);
-    if (isNaN(date.getTime())) {
-      throw new Error(`Unable to parse instant from: ${input}`);
-    }
-    return Temporal.Instant.fromEpochMilliseconds(date.getTime());
-  }
+  return Temporal.Instant.from(input);
 }
 
 /**
@@ -193,7 +154,8 @@ export function parseDateLike(input: string): DateLike {
     case "instant":
       return parseInstant(input);
     case "iso-with-offset":
-      // Parse as instant first, then create ZDT with offset timezone
+      // Parse as Instant first, then create Zoned with offset timezone
+      // Because Instant can parse offsets, but doesn't store them
       const instant = Temporal.Instant.from(input);
       const offsetMatch = input.match(/([+-]\d{2}:\d{2})$/);
       if (!offsetMatch || !offsetMatch[1]) {
@@ -201,12 +163,7 @@ export function parseDateLike(input: string): DateLike {
       }
       return instant.toZonedDateTimeISO(offsetMatch[1]);
     default:
-      // Try to parse as Date and convert to Instant
-      const date = new Date(input);
-      if (isNaN(date.getTime())) {
-        throw new Error(`Unable to parse date-like string: ${input}`);
-      }
-      return Temporal.Instant.fromEpochMilliseconds(date.getTime());
+      throw new Error(`Unable to parse ${type} string: ${input}`);
   }
 }
 
@@ -217,6 +174,8 @@ export function parseTimeLike(input: string): TimeLike {
   const type = detectTemporalType(input);
 
   switch (type) {
+    case "plain-time":
+      return parseTime(input);
     case "plain-datetime":
       return parseDateTime(input);
     case "zoned-datetime":
@@ -231,61 +190,9 @@ export function parseTimeLike(input: string): TimeLike {
       }
       return instant.toZonedDateTimeISO(offsetMatch[1]);
     default:
-      // Try to parse as PlainTime for time-only strings (including 12-hour format)
-      try {
-        return parseTime(input);
-      } catch {
-        // Fallback to parsing as Date and convert to Instant
-        const date = new Date(input);
-        if (isNaN(date.getTime())) {
-          throw new Error(`Unable to parse time-like string: ${input}`);
-        }
-        return Temporal.Instant.fromEpochMilliseconds(date.getTime());
-      }
+      throw new Error(`Unable to parse time-like string: ${input}`);
   }
 }
-
-// ============= SAFE PARSE FUNCTIONS =============
-
-/**
- * Safely parses a PlainDate string, returning undefined on error
- */
-export const safeParseDate = catchAsUndefined(parseDate);
-
-/**
- * Safely parses a PlainDateTime string, returning undefined on error
- */
-export const safeParseDateTime = catchAsUndefined(parseDateTime);
-
-/**
- * Safely parses a ZonedDateTime string, returning undefined on error
- */
-export const safeParseZoned = catchAsUndefined(parseZoned);
-
-/**
- * Safely parses a PlainTime string, returning undefined on error
- */
-export const safeParseTime = catchAsUndefined(parseTime);
-
-/**
- * Safely parses a PlainTime from 12-hour format, returning undefined on error
- */
-export const safeParseTimeFrom12Hour = catchAsUndefined(parseTimeFrom12Hour);
-
-/**
- * Safely parses an Instant string, returning undefined on error
- */
-export const safeParseInstant = catchAsUndefined(parseInstant);
-
-/**
- * Safely parses a DateLike string, returning undefined on error
- */
-export const safeParseDateLike = catchAsUndefined(parseDateLike);
-
-/**
- * Safely parses a TimeLike string, returning undefined on error
- */
-export const safeParseTimeLike = catchAsUndefined(parseTimeLike);
 
 // ============= VALIDATION FUNCTIONS =============
 
@@ -293,33 +200,33 @@ export const safeParseTimeLike = catchAsUndefined(parseTimeLike);
  * Validate that a string can be parsed as a PlainDate
  */
 export function isValidDateString(dateStr: string): boolean {
-  return safeParseDate(dateStr) !== undefined;
+  return safeParse(parseDate, dateStr) !== undefined;
 }
 
 /**
  * Validate that a string can be parsed as a PlainDateTime
  */
 export function isValidDateTimeString(dateTimeStr: string): boolean {
-  return safeParseDateTime(dateTimeStr) !== undefined;
+  return safeParse(parseDateTime, dateTimeStr) !== undefined;
 }
 
 /**
  * Validate that a string can be parsed as a ZonedDateTime
  */
 export function isValidZonedString(zonedDateTimeStr: string): boolean {
-  return safeParseZoned(zonedDateTimeStr) !== undefined;
+  return safeParse(parseZoned, zonedDateTimeStr) !== undefined;
 }
 
 /**
  * Validate that a string can be parsed as a PlainTime
  */
 export function isValidTimeString(timeStr: string): boolean {
-  return safeParseTime(timeStr) !== undefined;
+  return safeParse(parseTime, timeStr) !== undefined;
 }
 
 /**
  * Validate that a string can be parsed as an Instant
  */
 export function isValidInstantString(instantStr: string): boolean {
-  return safeParseInstant(instantStr) !== undefined;
+  return safeParse(parseInstant, instantStr) !== undefined;
 }

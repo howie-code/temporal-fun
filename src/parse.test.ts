@@ -5,7 +5,6 @@ import {
   parseDateTime,
   parseZoned,
   parseTime,
-  parseTimeFrom12Hour,
   parseInstant,
   parseDateLike,
   parseTimeLike,
@@ -121,59 +120,51 @@ describe("Parsing functions", () => {
       expect(result.millisecond).toBe(123);
     });
 
-    it("should parse decimal hours", () => {
-      const result = parseTime("9.5"); // 9.5 hours = 09:30:00
-      expect(result).toBeInstanceOf(PlainTime);
-      expect(result.hour).toBe(9);
-      expect(result.minute).toBe(30);
-    });
-
     it("should throw for invalid time strings", () => {
+      expect(() => parseTime("9.5")).toThrow();
       expect(() => parseTime("25:30")).toThrow();
       expect(() => parseTime("14:70")).toThrow();
       expect(() => parseTime("invalid-time")).toThrow();
     });
-  });
 
-  describe("parseTimeFrom12Hour()", () => {
     it("should parse 12-hour format with AM", () => {
-      const result = parseTimeFrom12Hour("2:30 AM");
+      const result = parseTime("2:30 AM");
       expect(result).toBeInstanceOf(PlainTime);
       expect(result.hour).toBe(2);
       expect(result.minute).toBe(30);
     });
 
     it("should parse 12-hour format with PM", () => {
-      const result = parseTimeFrom12Hour("2:30 PM");
+      const result = parseTime("2:30 PM");
       expect(result).toBeInstanceOf(PlainTime);
       expect(result.hour).toBe(14);
       expect(result.minute).toBe(30);
     });
 
     it("should handle 12 AM (midnight)", () => {
-      const result = parseTimeFrom12Hour("12:00 AM");
+      const result = parseTime("12:00 AM");
       expect(result).toBeInstanceOf(PlainTime);
       expect(result.hour).toBe(0);
       expect(result.minute).toBe(0);
     });
 
     it("should handle 12 PM (noon)", () => {
-      const result = parseTimeFrom12Hour("12:00 PM");
+      const result = parseTime("12:00 PM");
       expect(result).toBeInstanceOf(PlainTime);
       expect(result.hour).toBe(12);
       expect(result.minute).toBe(0);
     });
 
     it("should parse without spaces", () => {
-      const result = parseTimeFrom12Hour("2:30pm");
+      const result = parseTime("2:30pm");
       expect(result).toBeInstanceOf(PlainTime);
       expect(result.hour).toBe(14);
     });
 
     it("should throw for invalid 12-hour time strings", () => {
-      expect(() => parseTimeFrom12Hour("13:30 AM")).toThrow(); // 13 is invalid in 12-hour
-      expect(() => parseTimeFrom12Hour("2:70 PM")).toThrow(); // Invalid minutes
-      expect(() => parseTimeFrom12Hour("invalid")).toThrow();
+      expect(() => parseTime("13:30 AM")).toThrow(); // 13 is invalid in 12-hour
+      expect(() => parseTime("2:70 PM")).toThrow(); // Invalid minutes
+      expect(() => parseTime("invalid")).toThrow();
     });
   });
 
@@ -191,11 +182,6 @@ describe("Parsing functions", () => {
 
     it("should parse instant with offset", () => {
       const result = parseInstant("2024-03-15T14:30:00-05:00");
-      expect(result).toBeInstanceOf(Instant);
-    });
-
-    it("should parse Date-parseable strings", () => {
-      const result = parseInstant("2024-03-15");
       expect(result).toBeInstanceOf(Instant);
     });
 
@@ -315,10 +301,10 @@ describe("Validation functions", () => {
       expect(isValidTimeString("14:30:00")).toBe(true);
       expect(isValidTimeString("14:30")).toBe(true);
       expect(isValidTimeString("2:30pm")).toBe(true);
-      expect(isValidTimeString("9.5")).toBe(true); // decimal hours
     });
 
     it("should reject invalid PlainTime strings", () => {
+      expect(isValidTimeString("9.5")).toBe(false);
       expect(isValidTimeString("25:30")).toBe(false); // invalid hour
       expect(isValidTimeString("not-a-time")).toBe(false);
     });
@@ -330,12 +316,9 @@ describe("Validation functions", () => {
       expect(isValidInstantString("2024-03-15T14:30:00.123Z")).toBe(true);
     });
 
-    it("should validate Date-parseable strings", () => {
-      expect(isValidInstantString("2024-03-15")).toBe(true);
-      expect(isValidInstantString("March 15, 2024")).toBe(true);
-    });
-
     it("should reject invalid Instant strings", () => {
+      expect(isValidInstantString("2024-03-15")).toBe(false);
+      expect(isValidInstantString("March 15, 2024")).toBe(false);
       expect(isValidInstantString("not-a-date")).toBe(false);
       expect(isValidInstantString("")).toBe(false);
     });

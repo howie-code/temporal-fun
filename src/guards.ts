@@ -12,35 +12,35 @@ import type {
 /**
  * Type guard for Temporal.PlainDate
  */
-export function isDate(value: DateLike): value is PlainDate {
+export function isDate(value: unknown): value is PlainDate {
   return value instanceof Temporal.PlainDate;
 }
 
 /**
  * Type guard for Temporal.PlainDateTime
  */
-export function isDateTime(value: DateLike | TimeLike): value is PlainDateTime {
+export function isDateTime(value: unknown): value is PlainDateTime {
   return value instanceof Temporal.PlainDateTime;
 }
 
 /**
  * Type guard for Temporal.ZonedDateTime
  */
-export function isZoned(value: DateLike | TimeLike): value is Zoned {
+export function isZoned(value: unknown): value is Zoned {
   return value instanceof Temporal.ZonedDateTime;
 }
 
 /**
  * Type guard for Temporal.PlainTime
  */
-export function isTime(value: TimeLike): value is PlainTime {
+export function isTime(value: unknown): value is PlainTime {
   return value instanceof Temporal.PlainTime;
 }
 
 /**
  * Type guard for Temporal.Instant
  */
-export function isInstant(value: DateLike | TimeLike): value is Instant {
+export function isInstant(value: unknown): value is Instant {
   return value instanceof Temporal.Instant;
 }
 

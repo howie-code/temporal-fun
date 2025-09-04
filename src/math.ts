@@ -9,7 +9,7 @@ import type {
 } from "./types";
 import { isDate, isDateTime, isZoned, isInstant } from "./guards";
 import { date } from "./convert";
-import { compareDateLike } from "./compare";
+import { compare } from "./compare";
 import * as config from "./config";
 import { Concrete } from "./internal";
 
@@ -306,7 +306,7 @@ export function stepInterval<T extends DateLike>(
 
   // Loop until we reach or exceed the end date
   let current = start;
-  while (compareDateLike(current, end) <= 0) {
+  while (compare(current, end) <= 0) {
     result.push(current);
     current = current.add(step) as Concrete<T>;
   }

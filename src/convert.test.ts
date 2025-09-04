@@ -64,6 +64,12 @@ describe("date()", () => {
     expect(date("2024-01-15")).toBeInstanceOf(PlainDate);
     expect(date("2024-01-15T10:30:00")).toBeInstanceOf(PlainDate);
     expect(date(new Date("2024-01-15"))).toBeInstanceOf(PlainDate);
+    expect(date("2024-01-15T10:30:00[America/New_York]")).toBeInstanceOf(
+      PlainDate,
+    );
+    expect(date("2025-03-20T14:30:00-04:00[America/New_York]")).toBeInstanceOf(
+      PlainDate,
+    );
   });
 });
 
@@ -115,6 +121,31 @@ describe("instant()", () => {
 });
 
 describe("zoned()", () => {
+  it("converts without timezone arg", () => {
+    const zdt = zoned("2025-03-20T14:30:00-04:00[America/New_York]");
+    expect(zdt).toBeInstanceOf(Zoned);
+    expect(zdt.toString()).toBe("2025-03-20T14:30:00-04:00[America/New_York]");
+
+    const inst = zoned("2025-03-20T14:30:00Z");
+    expect(inst).toBeInstanceOf(Zoned);
+    expect(inst.toString()).toBe("2025-03-20T14:30:00+00:00[UTC]");
+
+    const zFromLegacy = zoned(new Date("2025-03-20T14:30:00Z"));
+    expect(zFromLegacy).toBeInstanceOf(Zoned);
+    expect(zFromLegacy.toString()).toBe("2025-03-20T14:30:00+00:00[UTC]");
+
+    const zdtIdent = zoned(zdt);
+    expect(zdtIdent).toBeInstanceOf(Zoned);
+    expect(zdtIdent.toString()).toBe(
+      "2025-03-20T14:30:00-04:00[America/New_York]",
+    );
+  });
+
+  it("throws without timezone arg", () => {
+    expect(() => zoned("2025-03-20")).toThrowError();
+    expect(() => zoned("2025-03-20T14:30:00")).toThrowError();
+  });
+
   it("converts PlainDate to ZonedDateTime", () => {
     const plainDate = PlainDate.from("2024-01-15");
     const result = zoned(plainDate, "America/New_York");
@@ -147,5 +178,18 @@ describe("zoned()", () => {
     const result = zoned(date, "America/New_York");
     expect(result).toBeInstanceOf(Zoned);
     expect(result.timeZoneId).toBe("America/New_York");
+  });
+
+  it("fails typechecking and throws for plain-to-zoned without timezone", () => {
+    // It's never valid to call zoned on PlainDate or PlainDateTime without a timezone arg
+    const plainDate = PlainDate.from("2024-01-15");
+    const plainDateTime = PlainDateTime.from("2024-01-15T10:30");
+
+    // These lines should cause TypeScript compile errors:
+    // @ts-expect-error - PlainDate requires timezone parameter
+    expect(() => zoned(plainDate)).toThrowError();
+
+    // @ts-expect-error - PlainDateTime requires timezone parameter
+    expect(() => zoned(plainDateTime).toThrowError());
   });
 });

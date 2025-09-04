@@ -1,15 +1,22 @@
 #!/usr/bin/env bun
 
-import { Temporal } from "temporal-polyfill";
-import { fmtShort, fmtMedium, fmtLong, fmtFull } from "../src/index.ts";
+import {
+  fmtShort,
+  fmtMedium,
+  fmtLong,
+  fmtFull,
+  PlainDate,
+  PlainTime,
+  PlainDateTime,
+  Zoned,
+  Instant,
+} from "../src/index.ts";
 
-const pd = Temporal.PlainDate.from("2025-03-24");
-const pt = Temporal.PlainTime.from("08:30:05");
-const dt = Temporal.PlainDateTime.from("2025-03-24T08:30:05");
-const zdt = Temporal.ZonedDateTime.from(
-  "2025-03-24T08:30:05[America/New_York]",
-);
-const inst = Temporal.Instant.from("2025-03-24T13:30:05Z");
+const pd = PlainDate.from("2025-03-24");
+const pt = PlainTime.from("08:30:05");
+const dt = PlainDateTime.from("2025-03-24T08:30:05");
+const zdt = Zoned.from("2025-03-24T08:30:05[America/New_York]");
+const inst = Instant.from("2025-03-24T13:30:05Z");
 
 const samples = [
   { name: "PlainDate", value: pd },

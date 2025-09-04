@@ -32,11 +32,6 @@ export type IntoDateLike = DateLike | Date | string;
 export type IntoTimeLike = TimeLike | Date | string;
 
 /**
- * Input types that can be converted to Instant
- */
-export type IntoInstant = DateLike | Date | string;
-
-/**
  * Week start options (0 = Sunday, 1 = Monday)
  */
 export type WeekStartsOn = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;

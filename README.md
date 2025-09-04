@@ -19,24 +19,30 @@ npm install temporal-fun temporal-polyfill
 ## Quick Start
 
 ```typescript
-import { date, dateTime, zoned, dateLike, isDateTime, fmtRelativeToNow, fmtShort, startOfWeek } from 'temporal-fun';
+import { date, dateTime, zoned, dateLike, isDateTime, fmtRelativeToNow, fmtShort, now, startOfWeek, today } from 'temporal-fun';
 
-// Direct conversion functions
-const plainDate = date('2024-01-15T10:30:00');  // → PlainDate (strips time)
-const plainDateTime = dateTime('2024-01-15');   // → PlainDateTime (adds 00:00 time)
-const zonedDateTime = zoned('2024-01-15T18:30', 'America/New_York'); // → ZonedDateTime
+// Parse & convert
+date('2025-03-20')  // PlainDate
+dateTime('2025-03-20T15:30:00')  // PlainDateTime
+zoned('2024-01-15T18:30[America/New_York]')  // Zoned
+zoned('2024-01-15', 'America/New_York')  // Zoned (midnight New York)
 
-// Smart conversion with dateLike()
-const parsed = dateLike('2024-01-15T10:30');  // PlainDateTime (inferred type is DateLike)
+date('2025-03-20T15:30:00') // PlainDate (strips time component)
+dateTime('2024-01-15')      // PlainDateTime (midnight)
 
-// Type narrowing from DateLike to PlainDateTime
+// Current date/time
+now()   // Instant
+today() // PlainDate
+
+// Parse into union of Temporal types with date component
+const parsed = dateLike('2024-01-15T10:30');
 if (isDateTime(parsed)) {
-  console.log(parsed.hour); // TypeScript knows this has a time component
+  // Type narrowed from DateLike to PlainDateTime
 }
 
 // Format dates
-fmtRelativeToNow(zonedDateTime); // "2 days ago"
-fmtShort(plainDate, 'en-US');    // "1/15/24"
+fmtShort(plainDate, { locales: 'en-US' })    // "1/15/24"
+fmtRelativeToNow(zonedDateTime, { locales: 'en-US' }) // "2 days ago"
 
 // Date math
 const weekStart = startOfWeek(zonedDateTime, 1); // Monday start
@@ -54,8 +60,8 @@ Throughout this library:
 - **instant** refers to `Temporal.Instant`
 - **legacy** refers to the JS built-in `Date`
 
-However, to avoid colliding with the built-in `Date` type/constructor
-temporal-fun keep the "Plain" prefixes **only** in the type definitions and constructor names.
+However, to avoid colliding with the built-in `Date` type/constructor,
+temporal-fun keeps the "Plain" prefixes **only** in the type definitions and constructor names.
 
 ```typescript
 // Constructor & type aliases
@@ -68,60 +74,70 @@ const Instant = Temporal.Instant;
 // Union types
 type DateLike = PlainDate | PlainDateTime | Zoned | Instant;  // Types with date component
 type TimeLike = PlainTime | PlainDateTime | Zoned | Instant;  // Types with time component
-type IntoDateLike = DateLike | Date | string;    // Inputs convertible to DateLike
-type IntoTimeLike = TimeLike | Date | string;    // Inputs convertible to TimeLike
 ```
-
-### Main Entry Points
-
-The library provides concise helper functions for common operations:
-
-- **`date(input)`, `dateTime(input)`, `time(input)`**: Parse and/or convert to specific temporal types
-- **`zoned(input, timezone)`**: Parse and/or convert to Zoned type
-- **`dateLike(input)`**: Parse and/or convert values with a date component into DateLike union
-- **`timeLike(input)`**: Parse and/or convert values with a time component into TimeLike union
-
-The `date`, `dateTime`, `time`, `instant`, and `zoned` functions will parse and/or convert into
-specific Temporal types (adding or remove date-time components as needed).
-
-The `parseDate`, `parseDateTime`, `parseTime`, `parseInstant`, `parseZoned` only perform the parsing.
-These functions are similar to Temporal's `from` methods but gracefully handle some additional formats.
-
 
 ## API Categories
 
-### 🔄 Conversion
-Convert between different date formats and types with intelligent defaults.
+### 👷 Constructing
 
 ```typescript
-import { dateLike, timeLike, date, dateTime, time, zoned, parseZoned, instant, now, today, nowZoned, legacy } from 'temporal-fun';
+import { now, today, nowZoned, PlainDate, PlainDateTime, Instant, Time, Zoned } from 'temporal-fun';
 
 // Current time functions
 now();                           // → Instant (current)
 today();                         // → PlainDate (today)
 nowZoned('America/New_York');    // → ZonedDateTime (now in timezone)
 
-// Direct conversion
-date('2024-01-15T10:30:00');      // → PlainDate (strips time)
-dateTime('2024-01-15');           // → PlainDateTime (adds 00:00 time)
+// Temporal constructors
+PlainDate(year, month, day)
+PlainDateTime(year, month, day, hour?, minute?, second?)
+Instant(epochNanoseconds)
+Zoned(epochNanoseconds, timezone)
+PlainTime(hour?, minute?, second?)
+```
+
+### 📝 Parsing & Conversion
+
+Construct Temporal types via parsing and/or conversions with intuitive behaviors.
+
+The `date`, `time`, `dateTime`, `zoned`, and `instant` functions have 2 steps:
+1. **Parse** strings into the best-fitting Temporal type (if called with strings)
+2. **Convert** to the target Temporal type (if not already in target type)
+
+See [PARSING.md](PARSING.md) for a more thorough explanation and comparison of Temporal vs temporal-fun parsing methods:
+
+```typescript
+import { dateLike, timeLike, date, dateTime, time, zoned, parseZoned, instant, now, nowZoned, legacy } from 'temporal-fun';
+
+// Parsing
+date('2024-01-15');               // → PlainDate
+dateTime('2024-01-15T10:30:00');  // → PlainDateTime
 time('14:30:00');                 // → PlainTime
 instant('2024-01-15T10:30Z');     // → Instant
-instant(new Date())               // → Instant (but `now()` is preferred)
+zoned('2024-01-15T10:30:00[America/New_York]'); // → Zoned
 
-// ZonedDateTime creation
-zoned('2024-01-15', 'America/New_York');        // → ZonedDateTime
-zoned(new Date(), 'America/New_York');          // → ZonedDateTime
+// Parse with automatic conversion
+date('2024-01-15T10:30:00');      // → PlainDate (strips time)
+dateTime('2024-01-15');           // → PlainDateTime (midnight)
+time('2024-01-1514:30:00');       // → PlainTime (stripe date)
+instant('2024-01-15');            // → Instant (midnight)
+zoned('2024-01-15T10:30Z');       // → Zoned (UTC timezone)
 
-// Explicit parsing
-parseZoned('2024-01-15T10:30:00[America/New_York]'); // → ZonedDateTime
+// Converting
+date(nowZoned('America/New_York'))  // → PlainDate: "today in New York"
+instant(new Date())                 // → Instant: Same as `now()`
+instant(date('2024-01-15'))         // → Instant: Same as `instant('2024-01-15')`
+zoned(now())                        // → Zoned: Same as `nowZoned('UTC')`
+zoned('2024-01-15', 'America/New_York');  // → Zoned: midnight in New York
+zoned(new Date(), 'America/New_York');    // → Zoned: Same as `nowZoned('America/New_York')`
 
-// Union conversion
+// Parse into a union of Temporal types
 dateLike('2024-01-15');           // → PlainDate
 dateLike('2024-01-15T10:30');     // → PlainDateTime
 dateLike('2024-01-15T10:30Z');    // → Instant
 
 // Convert back to legacy Date
-legacy(instant('2024-01-15T10:30Z')); // → Date
+legacy(instant('2024-01-15T10:30Z')); // → Date: Same as `new Date('2024-01-15T10:30Z')`
 ```
 
 ### 🔍 Type Guards
@@ -171,10 +187,10 @@ fmtShort(d, { locales: 'en-GB' })  // Overrides the default locale
 Compare dates and check relationships.
 
 ```typescript
-import { compareDateLike, isBefore, isAfter, isEqualOrBefore, isEqualOrAfter, isSameDay, isSameWeek, rangesOverlap } from 'temporal-fun';
+import { compare, isBefore, isAfter, isEqualOrBefore, isEqualOrAfter, isSameDay, isSameWeek, rangesOverlap } from 'temporal-fun';
 
 // Basic comparisons
-compareDateLike(date1, date2);    // -1, 0, or 1
+compare(date1, date2);    // -1, 0, or 1
 isBefore(date1, date2);           // boolean
 isAfter(date1, date2);            // boolean
 isEqualOrBefore(date1, date2);    // boolean
@@ -198,7 +214,7 @@ import { startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth,
 // Start/end of periods
 startOfDay(dateTime);                    // Set time to 00:00:00
 endOfDay(date);                          // Set time to 23:59:59.999
-startOfWeek(date, 1);                    // Monday start (1), Sunday = 0
+startOfWeek(date, 1);                    // Monday = 1, Sunday = 0 or 7
 endOfWeek(date, 1);                      // End of week
 startOfMonth(date);                      // First day of month
 endOfMonth(date);                        // Last day of month
@@ -241,7 +257,7 @@ fmtLong(dateTime, { locales: 'en-US' });     // "March 24, 2025 at 8:30 AM"
 fmtFull(dateTime, { locales: 'en-US'});      // "Monday, March 24, 2025 at 8:30:05 AM"
 ```
 
-Examples of how these format helpers render different locales (generated by `scripts/gen-local-formats.ts <locales>`):
+Examples of how these format helpers render different locales (generated by `scripts/locale-formats.ts <locales>`):
 
 | Format | en-US | en-GB | es-ES | zh-CN |
 |---|---|---|---|---|
@@ -289,32 +305,17 @@ getGMTOffset(300);                          // "GMT+5:00" (300 minutes = 5 hours
 getGMTOffset(-330);                         // "GMT-5:30" (India offset)
 ```
 
-### 📝 Parsing
-Parse various date/time string formats (primarily RFC 9557) via Temporal `from` methods handling a few extra cases:
-- `parseDateTime` supports 'T' or ' ' separator
-- `parseZoned` corrects offset-timezone mismatches
-- `parseTime` detects AM/PM suffixes
+### ✅ Validation
 
-Additionally, there are "safe" variants that return undefined instead of throwing for parse errors (e.g. `safeParseDate`).
+Validate if a string can be parsed into a given Temporal type.
 
 ```typescript
-import { parseDate, parseDateTime, parseZoned, parseTime, parseInstant, parseDateLike, parseTimeLike, isValidDateString, isValidTimeString } from 'temporal-fun';
-
-// Direct parsing
-parseDate('2024-01-15');                    // → PlainDate
-parseDateTime('2024-01-15T10:30:00');       // → PlainDateTime
-parseZoned('2024-01-15T10:30:00[America/New_York]'); // → Zoned
-parseTime('14:30:00');                      // → PlainTime
-parseTime('2:30 PM');                       // → PlainTime (14:30:00)
-parseInstant('2024-01-15T10:30:00Z');       // → Instant
-
-// Union parsing
-parseDateLike('2024-01-15');                // → PlainDate
-parseDateLike('2024-01-15T10:30:00Z');      // → Instant
-parseTimeLike('2:30 PM');                   // → PlainTime
-parseTimeLike('2024-01-15T10:30:00Z');      // → Instant
+import { isValidDateString, isValidTimeString, isValidZonedString } from 'temporal-fun';
 
 // Validation
-isValidDateString('2024-01-15');            // true
-isValidTimeString('25:30');                 // false
+isValidDateString('2024-01-15'); // true
+isValidTimeString('25:30'); // false
+isValidDateTimeString('2024-01-15 25:30') // true
+isValidInstant('2024-01-15'); // false
+isValidZonedString('2024-01-15T10:30:00[America/New_York]') // true
 ```

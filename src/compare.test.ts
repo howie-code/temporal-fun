@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { PlainDate, PlainDateTime, Instant } from "./types";
 import {
-  compareDateLike,
+  compare,
   isBefore,
   isAfter,
   isEqualOrBefore,
@@ -15,31 +15,31 @@ describe("compareDateLike()", () => {
   it("returns 0 for equal dates", () => {
     const date1 = PlainDate.from("2024-01-15");
     const date2 = PlainDate.from("2024-01-15");
-    expect(compareDateLike(date1, date2)).toBe(0);
+    expect(compare(date1, date2)).toBe(0);
   });
 
   it("returns negative when first date is before second", () => {
     const earlier = PlainDate.from("2024-01-15");
     const later = PlainDate.from("2024-01-16");
-    expect(compareDateLike(earlier, later)).toBeLessThan(0);
+    expect(compare(earlier, later)).toBeLessThan(0);
   });
 
   it("returns positive when first date is after second", () => {
     const later = PlainDate.from("2024-01-16");
     const earlier = PlainDate.from("2024-01-15");
-    expect(compareDateLike(later, earlier)).toBeGreaterThan(0);
+    expect(compare(later, earlier)).toBeGreaterThan(0);
   });
 
   it("works with PlainDateTime objects", () => {
     const dt1 = PlainDateTime.from("2024-01-15T10:00:00");
     const dt2 = PlainDateTime.from("2024-01-15T10:30:00");
-    expect(compareDateLike(dt1, dt2)).toBeLessThan(0);
+    expect(compare(dt1, dt2)).toBeLessThan(0);
   });
 
   it("works with Instant objects", () => {
     const instant1 = Instant.from("2024-01-15T10:00:00Z");
     const instant2 = Instant.from("2024-01-15T10:30:00Z");
-    expect(compareDateLike(instant1, instant2)).toBeLessThan(0);
+    expect(compare(instant1, instant2)).toBeLessThan(0);
   });
 });
 
