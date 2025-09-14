@@ -147,14 +147,16 @@ describe("fmtShort()", () => {
 
     it("formats across multiple locales", () => {
       expect(fmtShort(mockInstant, { locales: "en-US" })).toBe(
-        "3/24/25, 6:30 AM",
+        "3/24/25, 6:30 AM UTC",
       );
       expect(fmtShort(mockInstant, { locales: "en-GB" })).toBe(
-        "24/03/2025, 06:30",
+        "24/03/2025, 06:30 UTC",
       );
-      expect(fmtShort(mockInstant, { locales: "es-ES" })).toBe("24/3/25, 6:30");
+      expect(fmtShort(mockInstant, { locales: "es-ES" })).toBe(
+        "24/3/25, 6:30 UTC",
+      );
       expect(fmtShort(mockInstant, { locales: "zh-CN" })).toBe(
-        "2025/3/24 06:30",
+        "2025/3/24 06:30UTC",
       );
     });
   });
@@ -226,16 +228,16 @@ describe("fmtMedium()", () => {
 
     it("formats across multiple locales", () => {
       expect(fmtMedium(mockInstant, { locales: "en-US" })).toBe(
-        "Mar 24, 2025, 6:30 AM",
+        "Mar 24, 2025, 6:30 AM UTC",
       );
       expect(fmtMedium(mockInstant, { locales: "en-GB" })).toBe(
-        "24 Mar 2025, 06:30",
+        "24 Mar 2025, 06:30 UTC",
       );
       expect(fmtMedium(mockInstant, { locales: "es-ES" })).toBe(
-        "24 mar 2025, 6:30",
+        "24 mar 2025, 6:30 UTC",
       );
       expect(fmtMedium(mockInstant, { locales: "zh-CN" })).toBe(
-        "2025年3月24日 06:30",
+        "2025年3月24日 06:30UTC",
       );
     });
   });

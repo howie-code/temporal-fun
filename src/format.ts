@@ -89,12 +89,14 @@ export function fmtShort(
   if (isTimeLike(dl)) fmtOpts.timeStyle = "short";
   if (isInstant(dl)) fmtOpts.timeZone = "UTC";
 
-  if (!isZoned(dl)) {
+  if (!isZoned(dl) && !isInstant(dl)) {
     return dl.toLocaleString(locales, fmtOpts);
   }
 
   const dtString = dl.toLocaleString(locales, fmtOpts);
-  const tzName = getTimezoneName(dl, { locales, style: "short" });
+  const tzName = isZoned(dl)
+    ? getTimezoneName(dl, { locales, style: "short" })
+    : "UTC";
   return tzName
     ? [dtString, getLocaleTimeZoneJoiner(locales), tzName].join("")
     : dtString;
@@ -116,12 +118,14 @@ export function fmtMedium(
     fmtOpts.timeZone = "UTC";
   }
 
-  if (!isZoned(dl)) {
+  if (!isZoned(dl) && !isInstant(dl)) {
     return dl.toLocaleString(locales, fmtOpts);
   }
 
   const dtString = dl.toLocaleString(locales, fmtOpts);
-  const tzName = getTimezoneName(dl, { locales, style: "short" });
+  const tzName = isZoned(dl)
+    ? getTimezoneName(dl, { locales, style: "short" })
+    : "UTC";
   return tzName
     ? [dtString, getLocaleTimeZoneJoiner(locales), tzName].join("")
     : dtString;
