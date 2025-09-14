@@ -20,6 +20,15 @@ There are however differences, where temporal-fun is willing to make some assump
 | Zoned | Error | 2025-03-20T14:30:00+00:00[UTC] |
 | PlainTime | Error | 14:30:00 |
 
+## Format: "2025-03-20T14:30:00-08:00"
+| Type | Temporal | temporal-fun |
+|------|---------------|-----------------|
+| Instant | 2025-03-20T22:30:00Z | 2025-03-20T22:30:00Z |
+| PlainDate | 2025-03-20 | 2025-03-20 |
+| PlainDateTime | 2025-03-20T14:30:00 | 2025-03-20T14:30:00 |
+| Zoned | Error | 2025-03-20T14:30:00-08:00[-08:00] |
+| PlainTime | 14:30:00 | 14:30:00 |
+
 ## Format: "2025-03-20"
 | Type | Temporal | temporal-fun |
 |------|---------------|-----------------|
@@ -47,6 +56,15 @@ There are however differences, where temporal-fun is willing to make some assump
 | Zoned | 2025-03-20T14:30:00-04:00[America/New_York] | 2025-03-20T14:30:00-04:00[America/New_York] |
 | PlainTime | 14:30:00 | 14:30:00 |
 
+## Format: "2025-06-16T17:00:00-04:00[America/Asuncion]"
+| Type | Temporal | temporal-fun |
+|------|---------------|-----------------|
+| Instant | 2025-06-16T21:00:00Z | 2025-06-16T21:00:00Z |
+| PlainDate | 2025-06-16 | 2025-06-16 |
+| PlainDateTime | 2025-06-16T17:00:00 | 2025-06-16T18:00:00 |
+| Zoned | Error | 2025-06-16T18:00:00-03:00[America/Asuncion] |
+| PlainTime | 17:00:00 | 18:00:00 |
+
 ## Format: "14:30:00"
 | Type | Temporal | temporal-fun |
 |------|---------------|-----------------|
@@ -56,10 +74,14 @@ There are however differences, where temporal-fun is willing to make some assump
 | Zoned | Error | Error |
 | PlainTime | 14:30:00 | 14:30:00 |
 
-## Format: "04:30 pm"
+## Format: "07:30 pm"
 | Type | Temporal | temporal-fun |
 |------|---------------|-----------------|
-| PlainTime | Error |  16:30:00 |
+| Instant | Error | Error |
+| PlainDate | Error | Error |
+| PlainDateTime | Error | Error |
+| Zoned | Error | Error |
+| PlainTime | Error | 19:30:00 |
 
 
 **Zoned timezone/offset mismatches**: `zoned` corrects mismatches between offset and timezone. Example: "2025-06-16T17:00:00-04:00[America/Asuncion]" is invalid because Paraguay stopped observing DST in 2025, but this string was considered valid until the IANA database was updated.

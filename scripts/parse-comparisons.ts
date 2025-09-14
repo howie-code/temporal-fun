@@ -27,7 +27,6 @@ const testFormats = [
   { name: "PlainDate", format: pd.toString() },
   { name: "PlainDateTime", format: pdt.toString() },
   { name: "Zoned", format: zdt.toString() },
-  { name: "Valid", format: "2025-06-16T18:00:00-03:00[America/Asuncion]" },
   { name: "Mismatch", format: "2025-06-16T17:00:00-04:00[America/Asuncion]" },
   { name: "PlainTime", format: pt.toString() },
   { name: "12 Hour", format: "07:30 pm" },
