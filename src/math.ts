@@ -318,34 +318,31 @@ export function stepInterval<T extends DateLike>(
  * Returns an array of each day in the given interval
  * Works with any DateLike types - returns PlainDate array for consistency
  */
-export function eachDayOfInterval(interval: {
-  start: DateLike;
-  end: DateLike;
-}): PlainDate[] {
-  const pdInterval = { start: date(interval.start), end: date(interval.end) };
-  return stepInterval(pdInterval, { days: 1 });
+export function eachDayOfInterval<T extends DateLike>(interval: {
+  start: Concrete<T>;
+  end: Concrete<T>;
+}): T[] {
+  return stepInterval(interval, { days: 1 });
 }
 
 /**
  * Returns an array of the start of each week in the given interval
  * Works with any DateLike types - returns PlainDate array for consistency
  */
-export function eachWeekOfInterval(
-  interval: { start: DateLike; end: DateLike },
+export function eachWeekOfInterval<T extends DateLike>(
+  interval: { start: Concrete<T>; end: Concrete<T> },
   options: { weekStartsOn?: WeekStartsOn } = {},
-): PlainDate[] {
+): T[] {
   const { start, end } = interval;
   const { weekStartsOn = config.getWeekStart() } = options;
 
-  const startOfWeekDate = startOfWeek(date(start), weekStartsOn);
-  const endDate = date(end);
-  const result: PlainDate[] = [];
+  const result: Concrete<T>[] = [];
 
   // Convert start of week to PlainDate and loop
-  let current = startOfWeekDate;
-  while (Temporal.PlainDate.compare(current, endDate) <= 0) {
+  let current = startOfWeek(start, weekStartsOn);
+  while (compare(current, end) <= 0) {
     result.push(current);
-    current = current.add({ days: 7 });
+    current = current.add({ days: 7 }) as Concrete<T>;
   }
 
   return result;
@@ -355,20 +352,17 @@ export function eachWeekOfInterval(
  * Returns an array of the start of each month in the given interval
  * Works with any DateLike types - returns PlainDate array for consistency
  */
-export function eachMonthOfInterval(interval: {
-  start: DateLike;
-  end: DateLike;
-}): PlainDate[] {
+export function eachMonthOfInterval<T extends DateLike>(interval: {
+  start: Concrete<T>;
+  end: Concrete<T>;
+}): T[] {
   const { start, end } = interval;
-  const result: PlainDate[] = [];
+  const result: T[] = [];
 
-  const startOfMonthDate = date(startOfMonth(start));
-  const endDate = date(end);
-
-  let current = startOfMonthDate;
-  while (Temporal.PlainDate.compare(current, endDate) <= 0) {
+  let current = startOfMonth(start);
+  while (compare(current, end) <= 0) {
     result.push(current);
-    current = current.add({ months: 1 });
+    current = current.add({ months: 1 }) as Concrete<T>;
   }
 
   return result;
@@ -378,20 +372,17 @@ export function eachMonthOfInterval(interval: {
  * Returns an array of the start of each year in the given interval
  * Works with any DateLike types - returns PlainDate array for consistency
  */
-export function eachYearOfInterval(interval: {
-  start: DateLike;
-  end: DateLike;
-}): PlainDate[] {
+export function eachYearOfInterval<T extends DateLike>(interval: {
+  start: Concrete<T>;
+  end: Concrete<T>;
+}): T[] {
   const { start, end } = interval;
-  const result: PlainDate[] = [];
+  const result: T[] = [];
 
-  const startOfYearDate = date(startOfYear(start));
-  const endDate = date(end);
-
-  let current = startOfYearDate;
-  while (Temporal.PlainDate.compare(current, endDate) <= 0) {
+  let current = startOfYear(start);
+  while (compare(current, end) <= 0) {
     result.push(current);
-    current = current.add({ years: 1 });
+    current = current.add({ years: 1 }) as Concrete<T>;
   }
 
   return result;

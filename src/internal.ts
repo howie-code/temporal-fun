@@ -1,13 +1,3 @@
-import {
-  parseDate,
-  parseDateLike,
-  parseDateTime,
-  parseInstant,
-  parseTime,
-  parseTimeLike,
-  parseZoned,
-} from "./parse";
-
 export type IsUnion<T, U = T> = T extends unknown
   ? [U] extends [T]
     ? false
@@ -32,3 +22,7 @@ export function catchAsUndefined<T, Args extends unknown[]>(
 
 export const safeParse = <T>(parseFn: (str: string) => T, str: string) =>
   catchAsUndefined<T, [string]>(parseFn)(str);
+
+export function constructorName(value: unknown): string {
+  return (!!value && (value as any).constructor?.name) || null;
+}

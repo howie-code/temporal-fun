@@ -59,3 +59,7 @@ export function getGMTOffset(currentTimeOffsetInMinutes: number): string {
   const sign = hours >= 0 ? "+" : "-";
   return `GMT${sign}${Math.abs(hours)}:${minutes.toString().padStart(2, "0")}`;
 }
+
+export function getTimezoneOffsetMinutes(zdt: Zoned): number {
+  return zdt.offsetNanoseconds / (1e9 * 60);
+}

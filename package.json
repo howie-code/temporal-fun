@@ -29,15 +29,12 @@
     "time",
     "datetime",
     "timezone",
-    "duration",
-    "format",
-    "parse",
-    "utility"
+    "date-fns"
   ],
   "author": "Anthony Nowell <anthony@howie.ai>",
   "license": "MIT",
   "peerDependencies": {
-    "temporal-polyfill": "^0.2.0"
+    "temporal-polyfill": "^0.2.5"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

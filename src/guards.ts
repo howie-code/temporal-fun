@@ -1,4 +1,5 @@
 import { Temporal } from "temporal-polyfill";
+import { constructorName } from "./internal";
 import type {
   DateLike,
   TimeLike,

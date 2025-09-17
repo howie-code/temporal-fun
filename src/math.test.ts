@@ -287,15 +287,6 @@ describe("Math functions with DateLike types", () => {
         expect(result[0] && PlainDate.compare(result[0], start)).toBe(0);
         expect(result[2] && PlainDate.compare(result[2], end)).toBe(0);
       });
-
-      it("should handle mixed DateLike types", () => {
-        const start = parseDateTime("2024-03-15T10:00:00");
-        const end = parseInstant("2024-03-17T10:00:00Z");
-        const result = eachDayOfInterval({ start, end });
-
-        expect(result).toHaveLength(3);
-        expect(result[0]).toBeInstanceOf(PlainDate);
-      });
     });
 
     describe("eachWeekOfInterval", () => {
