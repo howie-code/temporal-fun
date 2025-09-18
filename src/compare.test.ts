@@ -1,15 +1,15 @@
-import { describe, it, expect } from "bun:test";
-import { PlainDate, PlainDateTime, Instant } from "./types";
+import { describe, expect, it } from "bun:test";
 import {
   compare,
-  isBefore,
   isAfter,
-  isEqualOrBefore,
+  isBefore,
   isEqualOrAfter,
+  isEqualOrBefore,
   isSameDay,
   isSameWeek,
   rangesOverlap,
 } from "./compare.js";
+import { Instant, PlainDate, PlainDateTime } from "./types";
 
 describe("compareDateLike()", () => {
   it("returns 0 for equal dates", () => {

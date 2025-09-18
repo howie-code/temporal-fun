@@ -1,19 +1,13 @@
-import { describe, it, expect } from "bun:test";
-import { jsonParseDateLike, jsonParseTimeLike } from "./json";
+import { describe, expect, it } from "bun:test";
 import { Temporal } from "temporal-polyfill";
+import { jsonParseDateLike, jsonParseTimeLike } from "./json";
 
 describe("JSON parse functions", () => {
   it("jsonParseDateLike", () => {
     // Parse bare string - various formats
-    expect(jsonParseDateLike('"2024-01-15"')).toBeInstanceOf(
-      Temporal.PlainDate,
-    );
-    expect(jsonParseDateLike('"2024-01-15T10:30:00"')).toBeInstanceOf(
-      Temporal.PlainDateTime,
-    );
-    expect(jsonParseDateLike('"2024-01-15T10:30:00Z"')).toBeInstanceOf(
-      Temporal.Instant,
-    );
+    expect(jsonParseDateLike('"2024-01-15"')).toBeInstanceOf(Temporal.PlainDate);
+    expect(jsonParseDateLike('"2024-01-15T10:30:00"')).toBeInstanceOf(Temporal.PlainDateTime);
+    expect(jsonParseDateLike('"2024-01-15T10:30:00Z"')).toBeInstanceOf(Temporal.Instant);
 
     // Parse object with mixed date types
     const obj = jsonParseDateLike(`{
@@ -30,9 +24,7 @@ describe("JSON parse functions", () => {
     expect(obj.offset).toBeInstanceOf(Temporal.ZonedDateTime);
 
     // Parse array
-    const arr = jsonParseDateLike(
-      '["2024-01-15", "2024-01-15T10:30:00Z", "not-a-date"]',
-    );
+    const arr = jsonParseDateLike('["2024-01-15", "2024-01-15T10:30:00Z", "not-a-date"]');
     expect(arr[0]).toBeInstanceOf(Temporal.PlainDate);
     expect(arr[1]).toBeInstanceOf(Temporal.Instant);
     expect(arr[2]).toBe("not-a-date");
@@ -41,9 +33,7 @@ describe("JSON parse functions", () => {
   it("jsonParseTimeLike", () => {
     // Parse bare string - various formats
     expect(jsonParseTimeLike('"14:30"')).toBeInstanceOf(Temporal.PlainTime);
-    expect(jsonParseTimeLike('"2024-01-15T10:30:00"')).toBeInstanceOf(
-      Temporal.PlainDateTime,
-    );
+    expect(jsonParseTimeLike('"2024-01-15T10:30:00"')).toBeInstanceOf(Temporal.PlainDateTime);
 
     // Parse object with mixed time types
     const obj = jsonParseTimeLike(

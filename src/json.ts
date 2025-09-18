@@ -1,10 +1,12 @@
-import { parseDateLike, parseTimeLike } from "./parse";
 import { catchAsUndefined } from "./internal";
-import { DateLike, TimeLike } from "./types";
+import { parseDateLike, parseTimeLike } from "./parse";
+import type { DateLike, TimeLike } from "./types";
 
 /**
  * Creates a JSON.parse reviver for parsing a date or time values
  */
+
+// biome-ignore lint/suspicious/noExplicitAny: as defined by JSON.parse
 type JsonReviver = (key: string, value: any) => any;
 
 function temporalReviver(
@@ -14,6 +16,7 @@ function temporalReviver(
   const keySet = keys ? new Set(keys) : null;
   const includeInts = keySet?.has("") ?? false;
 
+  // biome-ignore lint/suspicious/noExplicitAny: as defined by JSON.parse
   return (key: string, value: any) => {
     if (
       typeof value === "string" &&
@@ -56,7 +59,7 @@ export function timeLikeReviver(keys?: string[]) {
  * @param text The JSON string to parse
  * @param keys Optional array of keys to parse. If not provided, parses all string values.
  */
-export function jsonParseDateLike(text: string, keys?: string[]): any {
+export function jsonParseDateLike(text: string, keys?: string[]) {
   return JSON.parse(text, dateLikeReviver(keys));
 }
 
@@ -65,6 +68,6 @@ export function jsonParseDateLike(text: string, keys?: string[]): any {
  * @param text The JSON string to parse
  * @param keys Optional array of keys to parse. If not provided, parses all string values.
  */
-export function jsonParseTimeLike(text: string, keys?: string[]): any {
+export function jsonParseTimeLike(text: string, keys?: string[]) {
   return JSON.parse(text, timeLikeReviver(keys));
 }

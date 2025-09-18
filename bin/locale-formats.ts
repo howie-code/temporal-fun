@@ -1,15 +1,15 @@
 #!/usr/bin/env bun
 
 import {
-  fmtShort,
-  fmtMedium,
-  fmtLong,
   fmtFull,
-  PlainDate,
-  PlainTime,
-  PlainDateTime,
-  Zoned,
+  fmtLong,
+  fmtMedium,
+  fmtShort,
   Instant,
+  PlainDate,
+  PlainDateTime,
+  PlainTime,
+  Zoned,
 } from "../src/index.ts";
 
 const pd = PlainDate.from("2025-03-24");
@@ -28,9 +28,7 @@ const samples = [
 
 function generateTable(locales: string[]) {
   if (!locales || locales.length === 0) {
-    console.error(
-      "Usage: locale-fmts <locale1> [locale2] [locale3] ...",
-    );
+    console.error("Usage: locale-fmts <locale1> [locale2] [locale3] ...");
     console.error("Example: locale-fmts en-US en-GB es-ES");
     process.exit(1);
   }
@@ -62,7 +60,7 @@ function generateTable(locales: string[]) {
                   : fmtFull;
           const formatted = fmtFn(sample.value, { locales: locale });
           cells.push(formatted);
-        } catch (error) {
+        } catch {
           cells.push("*Error*");
         }
       }

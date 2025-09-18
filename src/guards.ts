@@ -1,13 +1,12 @@
 import { Temporal } from "temporal-polyfill";
-import { constructorName } from "./internal";
 import type {
   DateLike,
-  TimeLike,
+  Instant,
   PlainDate,
   PlainDateTime,
-  Zoned,
   PlainTime,
-  Instant,
+  TimeLike,
+  Zoned,
 } from "./types";
 
 /**

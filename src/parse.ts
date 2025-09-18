@@ -1,14 +1,14 @@
 import { Temporal } from "temporal-polyfill";
-import {
+import { safeParse } from "./internal";
+import type {
+  DateLike,
+  Instant,
   PlainDate,
   PlainDateTime,
-  Zoned,
   PlainTime,
-  Instant,
-  DateLike,
   TimeLike,
+  Zoned,
 } from "./types";
-import { safeParse } from "./internal";
 
 /**
  * Detects the type of a string representation of a date/time
@@ -113,8 +113,11 @@ function parseTimeFrom12Hour(time: string): PlainTime {
   }
 
   const [, hourStr, minuteStr, ampm] = match;
-  const hour = parseInt(hourStr!, 10);
-  const minute = parseInt(minuteStr!, 10);
+  if (!hourStr || !minuteStr || !ampm) {
+    throw new Error(`Invalid 12-hour time format: ${time}`);
+  }
+  const hour = parseInt(hourStr, 10);
+  const minute = parseInt(minuteStr, 10);
 
   // Validate 12-hour format ranges
   if (hour < 1 || hour > 12 || minute < 0 || minute > 59) {
@@ -122,9 +125,9 @@ function parseTimeFrom12Hour(time: string): PlainTime {
   }
 
   let hour24 = hour;
-  if (ampm!.toLowerCase() === "pm" && hour !== 12) {
+  if (ampm.toLowerCase() === "pm" && hour !== 12) {
     hour24 += 12;
-  } else if (ampm!.toLowerCase() === "am" && hour === 12) {
+  } else if (ampm.toLowerCase() === "am" && hour === 12) {
     hour24 = 0;
   }
 
@@ -153,7 +156,7 @@ export function parseDateLike(input: string): DateLike {
       return parseZoned(input);
     case "instant":
       return parseInstant(input);
-    case "iso-with-offset":
+    case "iso-with-offset": {
       // Parse as Instant first, then create Zoned with offset timezone
       // Because Instant can parse offsets, but doesn't store them
       const instant = Temporal.Instant.from(input);
@@ -162,6 +165,7 @@ export function parseDateLike(input: string): DateLike {
         throw new Error(`Expected timezone offset in string: ${input}`);
       }
       return instant.toZonedDateTimeISO(offsetMatch[1]);
+    }
     default:
       throw new Error(`Unable to parse ${type} string: ${input}`);
   }
@@ -182,13 +186,14 @@ export function parseTimeLike(input: string): TimeLike {
       return parseZoned(input);
     case "instant":
       return parseInstant(input);
-    case "iso-with-offset":
+    case "iso-with-offset": {
       const instant = Temporal.Instant.from(input);
       const offsetMatch = input.match(/([+-]\d{2}:\d{2})$/);
       if (!offsetMatch || !offsetMatch[1]) {
         throw new Error(`Expected timezone offset in string: ${input}`);
       }
       return instant.toZonedDateTimeISO(offsetMatch[1]);
+    }
     default:
       throw new Error(`Unable to parse time-like string: ${input}`);
   }

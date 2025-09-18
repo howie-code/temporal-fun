@@ -1,16 +1,18 @@
 #!/usr/bin/env bun
 
 import {
+  type DateLike,
   date,
   dateTime,
-  instant,
-  zoned,
-  PlainDate,
-  PlainTime,
-  PlainDateTime,
-  Zoned,
   Instant,
+  instant,
+  PlainDate,
+  PlainDateTime,
+  PlainTime,
+  type TimeLike,
   time,
+  Zoned,
+  zoned,
 } from "../src/index.ts";
 
 // Create instances of each temporal type to generate test formats
@@ -32,11 +34,11 @@ const testFormats = [
   { name: "12 Hour", format: "07:30 pm" },
 ];
 
-function tryParse(fn: (input: string) => any, input: string): string {
+function tryParse(fn: (input: string) => DateLike | TimeLike, input: string): string {
   try {
     const result = fn(input);
     return result.toString();
-  } catch (error) {
+  } catch {
     return "Error";
   }
 }

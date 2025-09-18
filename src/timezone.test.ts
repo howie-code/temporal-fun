@@ -1,7 +1,7 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import { Zoned } from "./types";
-import { isValidTimezone, getTimezoneName, getGMTOffset } from "./timezone.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import * as config from "./config";
+import { getGMTOffset, getTimezoneName, isValidTimezone } from "./timezone.js";
+import { Zoned } from "./types";
 
 describe("isValidTimezone()", () => {
   it("returns true for valid timezone strings", () => {

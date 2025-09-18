@@ -63,6 +63,12 @@ jobs:
       - name: Run tests
         run: bun run test
 
+      - name: Run lint
+        run: bun run lint
+
+      - name: Check formatting
+        run: bunx biome format --check .
+
       - name: Run build
         run: bun run build
 

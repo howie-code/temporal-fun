@@ -1,14 +1,14 @@
-import { describe, it, expect } from "bun:test";
-import { PlainDate, PlainDateTime, PlainTime, Instant, Zoned } from "./types";
+import { describe, expect, it } from "bun:test";
 import {
   isDate,
-  isDateTime,
-  isZoned,
-  isTime,
-  isInstant,
   isDateLike,
+  isDateTime,
+  isInstant,
+  isTime,
   isTimeLike,
+  isZoned,
 } from "./guards.js";
+import { Instant, PlainDate, PlainDateTime, PlainTime, Zoned } from "./types";
 
 // Test data
 const plainDate = PlainDate.from("2024-01-15");
@@ -135,12 +135,12 @@ describe("isTimeLike()", () => {
 describe("Type narrowing behavior", () => {
   it("properly narrows types in conditional blocks", () => {
     const value: unknown = plainDate;
-    
+
     if (isDateLike(value)) {
       // TypeScript should know this is DateLike
       expect(typeof value.toString).toBe("function");
     }
-    
+
     if (isTimeLike(value)) {
       // This shouldn't execute for PlainDate
       expect(true).toBe(false);
@@ -155,12 +155,12 @@ describe("Type narrowing behavior", () => {
     expect(isDateLike(plainDateTime)).toBe(true);
     expect(isTimeLike(plainDateTime)).toBe(true);
     expect(isDateTime(plainDateTime)).toBe(true);
-    
+
     // PlainDate is only DateLike
     expect(isDateLike(plainDate)).toBe(true);
     expect(isTimeLike(plainDate)).toBe(false);
     expect(isDate(plainDate)).toBe(true);
-    
+
     // PlainTime is only TimeLike
     expect(isDateLike(plainTime)).toBe(false);
     expect(isTimeLike(plainTime)).toBe(true);

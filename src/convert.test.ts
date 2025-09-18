@@ -1,14 +1,7 @@
-import { describe, it, expect } from "bun:test";
-import { PlainTime, PlainDate, PlainDateTime, Instant, Zoned } from "./types";
-import {
-  dateLike,
-  timeLike,
-  instant,
-  date,
-  zoned,
-  dateTime,
-} from "./convert.js";
+import { describe, expect, it } from "bun:test";
+import { date, dateLike, dateTime, instant, timeLike, zoned } from "./convert.js";
 import { parseZoned } from "./parse.js";
+import { Instant, PlainDate, PlainDateTime, PlainTime, Zoned } from "./types";
 
 describe("dateLike()", () => {
   it("converts string dates to PlainDate", () => {
@@ -64,12 +57,8 @@ describe("date()", () => {
     expect(date("2024-01-15")).toBeInstanceOf(PlainDate);
     expect(date("2024-01-15T10:30:00")).toBeInstanceOf(PlainDate);
     expect(date(new Date("2024-01-15"))).toBeInstanceOf(PlainDate);
-    expect(date("2024-01-15T10:30:00[America/New_York]")).toBeInstanceOf(
-      PlainDate,
-    );
-    expect(date("2025-03-20T14:30:00-04:00[America/New_York]")).toBeInstanceOf(
-      PlainDate,
-    );
+    expect(date("2024-01-15T10:30:00[America/New_York]")).toBeInstanceOf(PlainDate);
+    expect(date("2025-03-20T14:30:00-04:00[America/New_York]")).toBeInstanceOf(PlainDate);
   });
 });
 
@@ -136,9 +125,7 @@ describe("zoned()", () => {
 
     const zdtIdent = zoned(zdt);
     expect(zdtIdent).toBeInstanceOf(Zoned);
-    expect(zdtIdent.toString()).toBe(
-      "2025-03-20T14:30:00-04:00[America/New_York]",
-    );
+    expect(zdtIdent.toString()).toBe("2025-03-20T14:30:00-04:00[America/New_York]");
   });
 
   it("throws without timezone arg", () => {

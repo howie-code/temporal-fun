@@ -1,5 +1,5 @@
-import { describe, it, expect } from "bun:test";
-import { Temporal } from "temporal-polyfill";
+/** biome-ignore-all lint/style/noNonNullAssertion: test assertions */
+import { describe, expect, it } from "bun:test";
 
 const END_OF_DAY_TIME = {
   hour: 23,
@@ -10,26 +10,29 @@ const END_OF_DAY_TIME = {
   nanosecond: 999,
 };
 
+import { date, dateTime, zoned } from "./convert";
 import {
-  startOfDay,
-  endOfDay,
-  startOfWeek,
-  endOfWeek,
-  startOfMonth,
-  endOfMonth,
-  startOfYear,
-  endOfYear,
-  stepInterval,
+  ceil,
   eachDayOfInterval,
-  eachWeekOfInterval,
   eachMonthOfInterval,
+  eachWeekOfInterval,
   eachYearOfInterval,
+  endOfDay,
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  floor,
+  round,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+  stepInterval,
 } from "./math";
 import { parseDate, parseDateTime, parseInstant, parseZoned } from "./parse";
 import { Instant, PlainDate, PlainDateTime, Zoned } from "./types";
 
 describe("Math functions with DateLike types", () => {
-  // Test data for different DateLike types
   const pd = parseDate("2024-03-15");
   const pdt = parseDateTime("2024-03-15T14:30:00");
   const zdt = parseZoned("2024-03-15T14:30:00[America/New_York]");
@@ -119,10 +122,7 @@ describe("Math functions with DateLike types", () => {
       const utcZdt = inst.toZonedDateTimeISO("UTC");
       const dayOfWeek = utcZdt.dayOfWeek;
       const daysToSubtract = (dayOfWeek + 7 - 0) % 7; // Week starts on Sunday
-      const expectedInstant = utcZdt
-        .startOfDay()
-        .subtract({ days: daysToSubtract })
-        .toInstant();
+      const expectedInstant = utcZdt.startOfDay().subtract({ days: daysToSubtract }).toInstant();
       expect(Instant.compare(result, expectedInstant)).toBe(0);
     });
   });
@@ -178,10 +178,7 @@ describe("Math functions with DateLike types", () => {
       const utcZdt = inst.toZonedDateTimeISO("UTC");
       const dayOfWeek = utcZdt.dayOfWeek;
       const daysToAdd = (6 - dayOfWeek + 7) % 7; // Days to Saturday (week ends Saturday when starts Sunday)
-      const expectedInstant = utcZdt
-        .add({ days: daysToAdd })
-        .with(END_OF_DAY_TIME)
-        .toInstant();
+      const expectedInstant = utcZdt.add({ days: daysToAdd }).with(END_OF_DAY_TIME).toInstant();
       expect(Instant.compare(result, expectedInstant)).toBe(0);
     });
   });
@@ -218,10 +215,73 @@ describe("Math functions with DateLike types", () => {
     it("should treat Instant as UTC", () => {
       const result = endOfYear(inst);
       const utcZdt = inst.toZonedDateTimeISO("UTC");
-      const expected = utcZdt
-        .with({ month: 12, day: 31, ...END_OF_DAY_TIME })
-        .toInstant();
+      const expected = utcZdt.with({ month: 12, day: 31, ...END_OF_DAY_TIME }).toInstant();
       expect(Instant.compare(result, expected)).toBe(0);
+    });
+  });
+
+  describe("floor", () => {
+    it("should work with PlainDateTime", () => {
+      const dt = dateTime("2025-03-20 11:31:47.123789");
+      expect(floor(dt, "minute").toString()).toBe("2025-03-20T11:31:00");
+      expect(floor(dt, "second").toString()).toBe("2025-03-20T11:31:47");
+      expect(floor(dt, "day").toString()).toBe("2025-03-20T00:00:00");
+      expect(floor(dt, "month").toString()).toBe("2025-03-01T00:00:00");
+      expect(floor(dt, "year").toString()).toBe("2025-01-01T00:00:00");
+    });
+    it("should work with Zoned", () => {
+      const zdt = zoned("2025-03-20 11:31:47.123789[America/New_York]");
+      expect(floor(zdt, "hour").toString()).toBe("2025-03-20T11:00:00-04:00[America/New_York]");
+      expect(floor(zdt, "millisecond").toString()).toBe(
+        "2025-03-20T11:31:47.123-04:00[America/New_York]",
+      );
+    });
+    it("should work with PlainDate", () => {
+      const pd = date("2025-03-20");
+      expect(floor(pd, "day").toString()).toBe("2025-03-20");
+      expect(floor(pd, "month").toString()).toBe("2025-03-01");
+      expect(floor(pd, "year").toString()).toBe("2025-01-01");
+    });
+  });
+
+  describe("ceil", () => {
+    it("should work with PlainDateTime", () => {
+      const dt = dateTime("2025-03-20 11:31:47.123789");
+      expect(ceil(dt, "second").toString()).toBe("2025-03-20T11:31:48");
+      expect(ceil(dt, "minute").toString()).toBe("2025-03-20T11:32:00");
+      expect(ceil(dt, "day").toString()).toBe("2025-03-21T00:00:00");
+      expect(ceil(dt, "month").toString()).toBe("2025-04-01T00:00:00");
+      expect(ceil(dt, "year").toString()).toBe("2026-01-01T00:00:00");
+      expect(ceil(dt, "nanosecond").toString()).toBe("2025-03-20T11:31:47.123789");
+    });
+    it("should work with Zoned", () => {
+      const zdt = zoned("2025-03-20 11:31:47.123789[America/New_York]");
+      expect(ceil(zdt, "hour").toString()).toBe("2025-03-20T12:00:00-04:00[America/New_York]");
+      expect(ceil(zdt, "millisecond").toString()).toBe(
+        "2025-03-20T11:31:47.124-04:00[America/New_York]",
+      );
+    });
+    it("should work with PlainDate", () => {
+      const pd = date("2025-03-20");
+      expect(ceil(pd, "day").toString()).toBe("2025-03-20");
+      expect(ceil(pd, "month").toString()).toBe("2025-04-01");
+      expect(ceil(pd, "year").toString()).toBe("2026-01-01");
+    });
+  });
+
+  describe("round", () => {
+    it("should work with ZonedDateTime", () => {
+      const zdt = zoned("2025-03-20 11:31:47.123789[America/New_York]");
+      expect(round(zdt, "hour").toString()).toBe("2025-03-20T12:00:00-04:00[America/New_York]");
+      expect(round(zdt, "millisecond").toString()).toBe(
+        "2025-03-20T11:31:47.124-04:00[America/New_York]",
+      );
+    });
+    it("should work with PlainDate", () => {
+      const pd = date("2025-03-20");
+      expect(round(pd, "day").toString()).toBe("2025-03-20");
+      expect(round(pd, "month").toString()).toBe("2025-04-01");
+      expect(round(pd, "year").toString()).toBe("2025-01-01");
     });
   });
 

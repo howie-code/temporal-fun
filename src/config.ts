@@ -1,16 +1,18 @@
-import { WeekStartsOn } from "./types";
+import type { WeekStartsOn } from "./types";
 
 let defaultLocales: string | string[] | undefined;
 let defaultWeekStart: WeekStartsOn = 7; // Sunday
 
 export function setLocales(locales: string | string[]) {
   defaultLocales = locales;
-  const firstLocale = typeof locales === "string" ? locales : locales[0]!;
+  const firstLocale = typeof locales === "string" ? locales : locales[0];
+  if (!firstLocale) return;
+
   const loc = new Intl.Locale(firstLocale);
 
   // Guard against getWeekInfo not being available
   if ("getWeekInfo" in loc && typeof loc.getWeekInfo === "function") {
-    defaultWeekStart = (loc as any).getWeekInfo().firstDay as WeekStartsOn;
+    defaultWeekStart = loc.getWeekInfo().firstDay as WeekStartsOn;
   }
 }
 

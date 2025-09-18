@@ -1,8 +1,6 @@
-export type IsUnion<T, U = T> = T extends unknown
-  ? [U] extends [T]
-    ? false
-    : true
-  : never;
+import type { DateLike } from "./types";
+
+export type IsUnion<T, U = T> = T extends unknown ? ([U] extends [T] ? false : true) : never;
 export type Concrete<T> = IsUnion<T> extends true ? never : T;
 
 /**
@@ -24,5 +22,11 @@ export const safeParse = <T>(parseFn: (str: string) => T, str: string) =>
   catchAsUndefined<T, [string]>(parseFn)(str);
 
 export function constructorName(value: unknown): string {
-  return (!!value && (value as any).constructor?.name) || null;
+  // biome-ignore lint/suspicious/noExplicitAny: dynamic use of constructor for any Temporal type
+  return (!!value && (value as any)?.constructor?.name) || null;
+}
+
+export function uncheckedCompare(a: DateLike, b: DateLike): number {
+  // biome-ignore lint/suspicious/noExplicitAny: dynamically use different Temporal constructors
+  return (a.constructor as any).compare(a, b);
 }

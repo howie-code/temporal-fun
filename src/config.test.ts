@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach } from "bun:test";
-import * as config from "./config.js";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { isSameWeek } from "./compare.js";
+import * as config from "./config.js";
 import { PlainDate } from "./types.js";
 
 describe("temporalConfig", () => {

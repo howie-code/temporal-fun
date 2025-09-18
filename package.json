@@ -18,10 +18,13 @@
     "src/**/*"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "tsup",
     "test": "bun test src/",
     "test:watch": "bun test --watch src/",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
   },
   "keywords": [
     "temporal",
@@ -37,8 +40,10 @@
     "temporal-polyfill": "^0.2.5"
   },
   "devDependencies": {
+    "@biomejs/biome": "2.0.6",
     "@types/bun": "^1.2.22",
     "expect-type": "^1.2.2",
+    "tsup": "^7.2.0",
     "typescript": "^5.9.2"
   }
 }

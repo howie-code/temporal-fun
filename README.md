@@ -13,7 +13,7 @@ A modern date utility library for working with the [Temporal API](https://tc39.e
 ## Installation
 
 ```bash
-npm install temporal-fun temporal-polyfill
+npm install --save temporal-fun temporal-polyfill
 ```
 
 ## Quick Start
@@ -188,7 +188,7 @@ fmtShort(d, { locales: 'en-GB' })  // Overrides the default locale
 Compare dates and check relationships.
 
 ```typescript
-import { compare, isBefore, isAfter, isEqualOrBefore, isEqualOrAfter, isSameDay, isSameWeek, rangesOverlap } from 'temporal-fun';
+import { compare, isBefore, isAfter, isEqualOrBefore, isEqualOrAfter, isSameDay, isSameWeek, min, max, minMax, rangesOverlap } from 'temporal-fun';
 
 // Basic comparisons
 compare(date1, date2);    // -1, 0, or 1
@@ -196,6 +196,11 @@ isBefore(date1, date2);           // boolean
 isAfter(date1, date2);            // boolean
 isEqualOrBefore(date1, date2);    // boolean
 isEqualOrAfter(date1, date2);     // boolean
+
+// Min/max
+min([date1, date2, date3]);       // returns earliest date
+max([date1, date2]);              // returns latest date
+minMax([date1, date2, date3]);    // returns [earliest, latest]
 
 // Day/week comparison
 isSameDay(date1, date2);          // boolean
@@ -221,6 +226,9 @@ startOfMonth(date);                      // First day of month
 endOfMonth(date);                        // Last day of month
 startOfYear(date);                       // January 1st
 endOfYear(date);                         // December 31st
+floor(dateTime, "minute")                // Round down to the minute
+ceil(dateTime, "hour")                   // Round up to the hour
+round(date, "hour")                      // Round to the nearest hour
 
 // Interval sequences
 eachDayOfInterval({ start, end });        // Array of PlainDate

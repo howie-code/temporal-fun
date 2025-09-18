@@ -1,17 +1,36 @@
 import { Temporal } from "temporal-polyfill";
-import type {
-  WeekStartsOn,
-  DateLike,
-  Zoned,
-  PlainDate,
-  PlainDateTime,
-  Instant,
-} from "./types";
-import { isDate, isDateTime, isZoned, isInstant } from "./guards";
-import { date } from "./convert";
 import { compare } from "./compare";
 import * as config from "./config";
-import { Concrete } from "./internal";
+import { isDate, isDateLike, isDateTime, isInstant, isTimeLike, isZoned } from "./guards";
+import { type Concrete, constructorName, uncheckedCompare } from "./internal";
+import type {
+  DateLike,
+  Instant,
+  PlainDate,
+  PlainDateTime,
+  PlainTime,
+  TimeLike,
+  WeekStartsOn,
+  Zoned,
+} from "./types";
+
+const MIN_TIME = {
+  hour: 0,
+  minute: 0,
+  second: 0,
+  millisecond: 0,
+  microsecond: 0,
+  nanosecond: 0,
+};
+
+const MAX_TIME = {
+  hour: 23,
+  minute: 59,
+  second: 59,
+  millisecond: 999,
+  microsecond: 999,
+  nanosecond: 999,
+};
 
 /**
  * Returns the start of the day for any DateLike type
@@ -26,13 +45,7 @@ export function startOfDay<T extends DateLike>(datelike: T): T {
   }
 
   if (isDateTime(datelike)) {
-    return datelike.with({
-      hour: 0,
-      minute: 0,
-      second: 0,
-      millisecond: 0,
-      nanosecond: 0,
-    }) as T;
+    return datelike.with(MIN_TIME) as T;
   }
 
   if (isZoned(datelike)) {
@@ -55,38 +68,22 @@ export function startOfDay<T extends DateLike>(datelike: T): T {
  * - ZonedDateTime: sets time to 23:59:59.999
  * - Instant: converts to UTC ZonedDateTime, gets end of day, converts back to Instant
  */
-export function endOfDay<T extends DateLike>(
-  datelike: T,
-): T extends PlainDate ? PlainDateTime : T {
-  const timeComponent = {
-    hour: 23,
-    minute: 59,
-    second: 59,
-    millisecond: 999,
-    microsecond: 999,
-    nanosecond: 999,
-  };
+export function endOfDay<T extends DateLike>(datelike: T): T extends PlainDate ? PlainDateTime : T {
   if (isDate(datelike)) {
-    return datelike.toPlainDateTime(timeComponent) as T extends PlainDate
-      ? PlainDateTime
-      : T;
+    return datelike.toPlainDateTime(MAX_TIME) as T extends PlainDate ? PlainDateTime : T;
   }
 
   if (isDateTime(datelike)) {
-    return datelike.with(timeComponent) as T extends PlainDate
-      ? PlainDateTime
-      : T;
+    return datelike.with(MAX_TIME) as T extends PlainDate ? PlainDateTime : T;
   }
 
   if (isZoned(datelike)) {
-    return datelike.with(timeComponent) as T extends PlainDate
-      ? PlainDateTime
-      : T;
+    return datelike.with(MAX_TIME) as T extends PlainDate ? PlainDateTime : T;
   }
 
   if (isInstant(datelike)) {
     const utcZdt = datelike.toZonedDateTimeISO("UTC");
-    const endOfDayZdt = utcZdt.with(timeComponent);
+    const endOfDayZdt = utcZdt.with(MAX_TIME);
     return endOfDayZdt.toInstant() as T extends PlainDate ? PlainDateTime : T;
   }
 
@@ -98,10 +95,7 @@ export function endOfDay<T extends DateLike>(
  * - Instant: treated as UTC
  * - Returns same type as input (Instant returns Instant, etc.)
  */
-export function startOfWeek<T extends DateLike>(
-  datelike: T,
-  weekStartsOn?: WeekStartsOn,
-): T {
+export function startOfWeek<T extends DateLike>(datelike: T, weekStartsOn?: WeekStartsOn): T {
   const weekStart = weekStartsOn ?? config.getWeekStart();
   if (isDate(datelike)) {
     const dayOfWeek = datelike.dayOfWeek;
@@ -126,9 +120,7 @@ export function startOfWeek<T extends DateLike>(
     const utcZdt = datelike.toZonedDateTimeISO("UTC");
     const dayOfWeek = utcZdt.dayOfWeek;
     const daysToSubtract = (dayOfWeek + 7 - weekStart) % 7;
-    const startOfWeekZdt = utcZdt
-      .startOfDay()
-      .subtract({ days: daysToSubtract });
+    const startOfWeekZdt = utcZdt.startOfDay().subtract({ days: daysToSubtract });
     return startOfWeekZdt.toInstant() as T;
   }
 
@@ -140,10 +132,7 @@ export function startOfWeek<T extends DateLike>(
  * - Instant: treated as UTC
  * - Returns same type as input, except PlainDate returns PlainDateTime for end of day
  */
-export function endOfWeek<T extends DateLike>(
-  datelike: T,
-  weekStartsOn?: WeekStartsOn,
-): T {
+export function endOfWeek<T extends DateLike>(datelike: T, weekStartsOn?: WeekStartsOn): T {
   const startOfWeekDate = startOfWeek(datelike, weekStartsOn);
 
   if (isDate(datelike) || isDateTime(datelike) || isZoned(datelike)) {
@@ -174,10 +163,7 @@ export function startOfMonth<T extends DateLike>(datelike: T): T {
   if (isDateTime(datelike)) {
     return datelike.with({
       day: 1,
-      hour: 0,
-      minute: 0,
-      second: 0,
-      millisecond: 0,
+      ...MIN_TIME,
     }) as T;
   }
 
@@ -239,10 +225,7 @@ export function startOfYear<T extends DateLike>(datelike: T): T {
     return datelike.with({
       month: 1,
       day: 1,
-      hour: 0,
-      minute: 0,
-      second: 0,
-      millisecond: 0,
+      ...MIN_TIME,
     }) as T;
   }
 
@@ -288,6 +271,138 @@ export function endOfYear<T extends DateLike>(datelike: T): T {
   }
 
   throw new Error(`Unsupported DateLike type: ${typeof datelike}`);
+}
+
+function singularUnit<T extends Temporal.DateTimeUnit>(unit: T | Temporal.PluralUnit<T>): T {
+  // All DateTimeUnits can be singularized without the trailing 's'
+  if (unit.endsWith("s")) {
+    return unit.slice(0, -1) as T;
+  }
+  return unit as T;
+}
+
+function isTimeUnit(unit: Temporal.DateTimeUnit): unit is Temporal.TimeUnit {
+  return ["hour", "minute", "second", "millisecond", "microsecond", "nanosecond"].includes(unit);
+}
+
+function isDateUnit(unit: Temporal.DateTimeUnit): unit is Temporal.DateUnit {
+  return ["year", "month", "week", "day"].includes(unit);
+}
+
+type RoundingUnit<T> = T extends PlainTime
+  ? Temporal.SmallestUnit<Temporal.TimeUnit>
+  : T extends PlainDate
+    ? Temporal.SmallestUnit<Temporal.DateUnit>
+    : T extends PlainDateTime | Zoned | Instant
+      ? Temporal.SmallestUnit<Temporal.DateTimeUnit>
+      : never;
+
+/**
+ * Rounds the time down to the given unit.
+ *
+ * @param value - Component with date or time value to floor
+ * @param smallestUnit - date or time unit (e.g. "day", "minute", "second")
+ * @returns value floored the the specified smallest unit
+ */
+export function floor<T extends TimeLike | DateLike>(value: T, smallestUnit: RoundingUnit<T>): T {
+  const unit = singularUnit(smallestUnit);
+  if (isTimeLike(value) && isTimeUnit(unit)) {
+    return value.round({
+      smallestUnit: unit,
+      roundingMode: "trunc",
+    }) as T;
+  }
+
+  if (isDateLike(value) && isDateUnit(unit)) {
+    if (unit === "year") {
+      return startOfYear(value);
+    }
+    if (unit === "month") {
+      return startOfMonth(value);
+    }
+    if (unit === "week") {
+      throw new Error("Use startOfWeek instead to resolve weekStartsOn ambiguity");
+    }
+    if (unit === "day") {
+      return startOfDay(value);
+    }
+  }
+
+  throw new Error(`Unable to floor ${constructorName(value) ?? typeof value} to unit ${unit}`);
+}
+
+/**
+ * Rounds the time up to the given unit.
+ *
+ * Note: while flooring date units is essentially an alternative to startOf- functions
+ * ceil is NOT an alternative to endOf- functions.
+ * ceil always round to the start of the next value specified by smallestUnit
+ * unless the value is already aligned to the smallestUnit.
+ *
+ * @param value - Component with date or time value to ceil
+ * @param smallestUnit - date or time unit (e.g. "day", "minute", "second")
+ * @returns value ceiled the the specified smallest unit
+ */
+export function ceil<T extends TimeLike | DateLike>(value: T, smallestUnit: RoundingUnit<T>): T {
+  const unit = singularUnit(smallestUnit);
+  if (isTimeLike(value) && isTimeUnit(unit)) {
+    return value.round({
+      smallestUnit: unit,
+      roundingMode: "ceil",
+    }) as T;
+  }
+
+  if (isDateLike(value) && isDateUnit(unit)) {
+    if (unit === "week") {
+      throw new Error("ceil for week unit is ambiguous without weekStartsOn value");
+    }
+
+    const floored = floor(value, smallestUnit) as DateLike;
+    if (uncheckedCompare(value, floored) === 0) {
+      return value;
+    }
+
+    return floored.add({
+      years: unit === "year" ? 1 : 0,
+      months: unit === "month" ? 1 : 0,
+      days: unit === "day" ? 1 : 0,
+    }) as T;
+  }
+
+  throw new Error(`Unable to ceil ${constructorName(value) ?? typeof value} to unit ${unit}`);
+}
+
+export function round<T extends TimeLike | DateLike>(value: T, smallestUnit: RoundingUnit<T>): T {
+  const unit = singularUnit(smallestUnit);
+  if (isTimeLike(value) && isTimeUnit(unit)) {
+    return value.round({
+      smallestUnit: unit,
+      roundingMode: "halfExpand",
+    }) as T;
+  }
+
+  if (isDateUnit(unit)) {
+    if (isDate(value)) {
+    }
+  }
+  if (isDateLike(value) && isDateUnit(unit)) {
+    if (unit === "week") {
+      throw new Error("Use endOfWeek instead to resolve weekStartsOn ambiguity");
+    }
+
+    const floored = floor<T>(value, smallestUnit);
+    const ceiled = ceil<T>(value, smallestUnit);
+    // biome-ignore lint/suspicious/noExplicitAny: value is T
+    const diff1 = floored.until(value as any);
+    // biome-ignore lint/suspicious/noExplicitAny: value is T
+    const diff2 = value.until(ceiled as any);
+
+    return Temporal.Duration.compare(diff1, diff2) < 0 ? floored : ceiled;
+  }
+
+  throw new Error(
+    `Unable to round ${constructorName(value) ?? typeof value} to unit ${smallestUnit}`,
+  );
 }
 
 /**

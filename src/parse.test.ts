@@ -1,19 +1,19 @@
-import { describe, it, expect } from "bun:test";
-import { PlainDate, PlainDateTime, PlainTime, Instant, Zoned } from "./types";
+import { describe, expect, it } from "bun:test";
 import {
-  parseDate,
-  parseDateTime,
-  parseZoned,
-  parseTime,
-  parseInstant,
-  parseDateLike,
-  parseTimeLike,
-  isValidInstantString,
   isValidDateString,
   isValidDateTimeString,
+  isValidInstantString,
   isValidTimeString,
   isValidZonedString,
+  parseDate,
+  parseDateLike,
+  parseDateTime,
+  parseInstant,
+  parseTime,
+  parseTimeLike,
+  parseZoned,
 } from "./parse";
+import { Instant, PlainDate, PlainDateTime, PlainTime, Zoned } from "./types";
 
 describe("Parsing functions", () => {
   describe("parseDate()", () => {
@@ -46,6 +46,10 @@ describe("Parsing functions", () => {
       const result = parseDateTime("2024-03-15 14:30:00");
       expect(result).toBeInstanceOf(PlainDateTime);
       expect(result.toString()).toBe("2024-03-15T14:30:00");
+
+      const result2 = parseDateTime("2024-03-15 14:30");
+      expect(result2).toBeInstanceOf(PlainDateTime);
+      expect(result2.toString()).toBe("2024-03-15T14:30:00");
     });
 
     it("should parse datetime without seconds", () => {
@@ -94,9 +98,7 @@ describe("Parsing functions", () => {
     });
 
     it("should throw for invalid timezone strings", () => {
-      expect(() =>
-        parseZoned("2024-03-15T14:30:00[Invalid/Timezone]"),
-      ).toThrow();
+      expect(() => parseZoned("2024-03-15T14:30:00[Invalid/Timezone]")).toThrow();
       expect(() => parseZoned("invalid-zoned")).toThrow();
     });
   });
@@ -280,18 +282,12 @@ describe("Validation functions", () => {
 
   describe("isValidZonedString", () => {
     it("should validate correct ZonedDateTime strings", () => {
-      expect(isValidZonedString("2024-03-15T14:30:00[America/New_York]")).toBe(
-        true,
-      );
-      expect(
-        isValidZonedString("2024-03-15T14:30:00+05:00[Asia/Karachi]"),
-      ).toBe(true);
+      expect(isValidZonedString("2024-03-15T14:30:00[America/New_York]")).toBe(true);
+      expect(isValidZonedString("2024-03-15T14:30:00+05:00[Asia/Karachi]")).toBe(true);
     });
 
     it("should reject invalid ZonedDateTime strings", () => {
-      expect(isValidZonedString("2024-03-15T14:30:00[Invalid/Timezone]")).toBe(
-        false,
-      );
+      expect(isValidZonedString("2024-03-15T14:30:00[Invalid/Timezone]")).toBe(false);
       expect(isValidZonedString("not-a-zdt")).toBe(false);
     });
   });

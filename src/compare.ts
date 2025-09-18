@@ -1,66 +1,75 @@
-import {
-  DateLike,
-  WeekStartsOn,
-  PlainDate,
-  PlainDateTime,
-  Zoned,
-  Instant,
-} from "./types.js";
-import { startOfWeek } from "./math.js";
+import * as config from "./config.js";
 import { date } from "./convert.js";
 import { isDate } from "./guards.js";
-import * as config from "./config.js";
-import { Concrete } from "./internal.js";
+import type { Concrete } from "./internal.js";
+import { startOfWeek } from "./math.js";
+import { type DateLike, PlainDate, type WeekStartsOn } from "./types.js";
 
 /**
  * Compares two DateLike objects using their constructor's compare method
  */
-export function compare<T extends DateLike>(
-  a: Concrete<T>,
-  b: Concrete<T>,
-): number {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const constructor = a.constructor as any;
-  return constructor.compare(a, b);
+export function compare<T extends DateLike>(a: Concrete<T>, b: Concrete<T>): number {
+  // biome-ignore lint/suspicious/noExplicitAny: dynamically use different Temporal constructors
+  return (a.constructor as any).compare(a, b);
+}
+
+export function min<T extends DateLike>(datelikes: Concrete<T>[]): T {
+  if (datelikes.length === 0) throw new Error("Cannot get min of empty array of dates");
+
+  return datelikes.reduce(
+    (acc, item) => (isBefore(item, acc) ? item : acc),
+    // biome-ignore lint/style/noNonNullAssertion: length already checked
+    datelikes[0]!,
+  );
+}
+
+export function max<T extends DateLike>(datelikes: Concrete<T>[]): T {
+  if (datelikes.length === 0) throw new Error("Cannot get min of empty array of dates");
+
+  return datelikes.reduce(
+    (acc, item) => (isAfter(item, acc) ? item : acc),
+    // biome-ignore lint/style/noNonNullAssertion: length already checked
+    datelikes[0]!,
+  );
+}
+
+export function minMax<T extends DateLike>(datelikes: Concrete<T>[]): [T, T] {
+  if (datelikes.length === 0) throw new Error("Cannot minMax empty array of dates");
+
+  return datelikes.reduce(
+    ([min, max], item) => {
+      return isBefore(item, min) ? [item, max] : isAfter(item, max) ? [min, item] : [min, max];
+    },
+    // biome-ignore lint/style/noNonNullAssertion: length already checked
+    [datelikes[0]!, datelikes[0]!],
+  );
 }
 
 /**
  * Returns true if the first date is before the second date
  */
-export function isBefore<T extends DateLike>(
-  a: Concrete<T>,
-  b: Concrete<T>,
-): boolean {
+export function isBefore<T extends DateLike>(a: Concrete<T>, b: Concrete<T>): boolean {
   return compare(a, b) < 0;
 }
 
 /**
  * Returns true if the first date is equal to or before the second date
  */
-export function isEqualOrBefore<T extends DateLike>(
-  a: Concrete<T>,
-  b: Concrete<T>,
-): boolean {
+export function isEqualOrBefore<T extends DateLike>(a: Concrete<T>, b: Concrete<T>): boolean {
   return compare(a, b) <= 0;
 }
 
 /**
  * Returns true if the first date is after the second date
  */
-export function isAfter<T extends DateLike>(
-  a: Concrete<T>,
-  b: Concrete<T>,
-): boolean {
+export function isAfter<T extends DateLike>(a: Concrete<T>, b: Concrete<T>): boolean {
   return compare(a, b) > 0;
 }
 
 /**
  * Returns true if the first date is equal to or after the second date
  */
-export function isEqualOrAfter<T extends DateLike>(
-  a: Concrete<T>,
-  b: Concrete<T>,
-): boolean {
+export function isEqualOrAfter<T extends DateLike>(a: Concrete<T>, b: Concrete<T>): boolean {
   return compare(a, b) >= 0;
 }
 
@@ -78,11 +87,7 @@ export function isSameDay(a: DateLike, b: DateLike): boolean {
  * Returns true if both dates are in the same week
  * Works with any DateLike types - Instant is treated as UTC
  */
-export function isSameWeek(
-  a: DateLike,
-  b: DateLike,
-  weekStartsOn?: WeekStartsOn,
-): boolean {
+export function isSameWeek(a: DateLike, b: DateLike, weekStartsOn?: WeekStartsOn): boolean {
   const weekStart = weekStartsOn ?? config.getWeekStart();
   const startOfWeekA = startOfWeek(a, weekStart);
   const startOfWeekB = startOfWeek(b, weekStart);

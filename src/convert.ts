@@ -1,18 +1,18 @@
 import { Temporal } from "temporal-polyfill";
-import {
-  DateLike,
-  TimeLike,
-  IntoDateLike,
-  IntoTimeLike,
-  PlainDate,
-  PlainDateTime,
-  Zoned,
-  PlainTime,
-  Instant,
-} from "./types.js";
-import { isDate, isDateTime, isZoned, isTime, isInstant } from "./guards.js";
-import { parseDateLike, parseTimeLike } from "./parse.js";
+import { isDate, isDateTime, isInstant, isTime, isZoned } from "./guards.js";
 import { constructorName } from "./internal.js";
+import { parseDateLike, parseTimeLike } from "./parse.js";
+import {
+  type DateLike,
+  Instant,
+  type IntoDateLike,
+  type IntoTimeLike,
+  type PlainDate,
+  type PlainDateTime,
+  type PlainTime,
+  type TimeLike,
+  type Zoned,
+} from "./types.js";
 
 // ============= CURRENT TIME FUNCTIONS =============
 
@@ -57,9 +57,7 @@ export function date(idl: IntoDateLike): PlainDate {
   if (isZoned(dl)) return dl.toPlainDate();
   if (isInstant(dl)) return dl.toZonedDateTimeISO("UTC").toPlainDate();
 
-  throw new Error(
-    `Unable to convert to PlainDate: ${constructorName(dl) ?? typeof dl}`,
-  );
+  throw new Error(`Unable to convert to PlainDate: ${constructorName(dl) ?? typeof dl}`);
 }
 
 /**
@@ -80,9 +78,7 @@ export function dateTime(idl: IntoDateLike): PlainDateTime {
   if (isZoned(dl)) return dl.toPlainDateTime();
   if (isInstant(dl)) return dl.toZonedDateTimeISO("UTC").toPlainDateTime();
 
-  throw new Error(
-    `Unable to convert to PlainDateTime: ${constructorName(dl) ?? typeof dl}`,
-  );
+  throw new Error(`Unable to convert to PlainDateTime: ${constructorName(dl) ?? typeof dl}`);
 }
 
 /**
@@ -115,9 +111,7 @@ export function zoned(idl: IntoDateLike, timezone?: string): Zoned {
   }
 
   if (!timezone) {
-    throw new Error(
-      "Must specify timezone when calling zoned with PlainDate or PlainDateTime",
-    );
+    throw new Error("Must specify timezone when calling zoned with PlainDate or PlainDateTime");
   }
 
   if (isDateTime(dl)) {
@@ -128,9 +122,7 @@ export function zoned(idl: IntoDateLike, timezone?: string): Zoned {
     return dl.toPlainDateTime({ hour: 0, minute: 0 }).toZonedDateTime(timezone);
   }
 
-  throw new Error(
-    `Unsupported type for conversion to Zoned: ${constructorName(dl) ?? typeof dl}`,
-  );
+  throw new Error(`Unsupported type for conversion to Zoned: ${constructorName(dl) ?? typeof dl}`);
 }
 
 /**
@@ -151,9 +143,7 @@ export function time(itl: IntoTimeLike): PlainTime {
   if (isZoned(tl)) return tl.toPlainTime();
   if (isInstant(tl)) return tl.toZonedDateTimeISO("UTC").toPlainTime();
 
-  throw new Error(
-    `Unable to convert to PlainTime: ${constructorName(tl) ?? typeof tl}`,
-  );
+  throw new Error(`Unable to convert to PlainTime: ${constructorName(tl) ?? typeof tl}`);
 }
 
 /**
@@ -215,14 +205,9 @@ export function instant(idl: IntoDateLike): Instant {
   if (isZoned(dl)) return dl.toInstant();
   if (isDateTime(dl)) return dl.toZonedDateTime("UTC").toInstant();
   if (isDate(dl))
-    return dl
-      .toPlainDateTime({ hour: 0, minute: 0 })
-      .toZonedDateTime("UTC")
-      .toInstant();
+    return dl.toPlainDateTime({ hour: 0, minute: 0 }).toZonedDateTime("UTC").toInstant();
 
-  throw new Error(
-    `Unsupported instant input type: ${constructorName(dl) ?? typeof dl}`,
-  );
+  throw new Error(`Unsupported instant input type: ${constructorName(dl) ?? typeof dl}`);
 }
 
 // Legacy conversion utilities
