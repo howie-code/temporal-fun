@@ -29,9 +29,9 @@ const samples = [
 function generateTable(locales: string[]) {
   if (!locales || locales.length === 0) {
     console.error(
-      "Usage: npm run gen:locale-fmts <locale1> [locale2] [locale3] ...",
+      "Usage: locale-fmts <locale1> [locale2] [locale3] ...",
     );
-    console.error("Example: npm run gen:locale-fmts en-US en-GB es-ES");
+    console.error("Example: locale-fmts en-US en-GB es-ES");
     process.exit(1);
   }
 

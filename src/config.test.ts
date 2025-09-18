@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import * as config from "./config.js";
 import { isSameWeek } from "./compare.js";
 import { PlainDate } from "./types.js";

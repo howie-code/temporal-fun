@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, jest } from "bun:test";
 import { PlainDate, PlainDateTime, PlainTime, Instant, Zoned } from "./types";
 import {
   fmtRelativeToNow,
@@ -11,12 +11,12 @@ import { now, nowZoned, today } from "./convert.js";
 
 describe("fmtRelativeToNow()", () => {
   beforeEach(() => {
-    vi.useFakeTimers();
-    vi.setSystemTime(new Date("2025-03-26T12:00:00Z"));
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2025-03-26T12:00:00Z"));
   });
 
   afterEach(() => {
-    vi.useRealTimers();
+    jest.useRealTimers();
   });
 
   it("formats past dates correctly", () => {
@@ -190,10 +190,10 @@ describe("fmtMedium()", () => {
 
     it("formats across multiple locales", () => {
       expect(fmtMedium(mockDateTime, { locales: "en-US" })).toBe(
-        "Mar 24, 2025, 8:30 AM",
+        "Mar 24, 2025 at 8:30 AM",
       );
       expect(fmtMedium(mockDateTime, { locales: "en-GB" })).toBe(
-        "24 Mar 2025, 08:30",
+        "24 Mar 2025 at 08:30",
       );
       expect(fmtMedium(mockDateTime, { locales: "es-ES" })).toBe(
         "24 mar 2025, 8:30",
@@ -209,10 +209,10 @@ describe("fmtMedium()", () => {
 
     it("formats across multiple locales", () => {
       expect(fmtMedium(mockZoned, { locales: "en-US" })).toBe(
-        "Mar 24, 2025, 8:30 AM EDT",
+        "Mar 24, 2025 at 8:30 AM EDT",
       );
       expect(fmtMedium(mockZoned, { locales: "en-GB" })).toBe(
-        "24 Mar 2025, 08:30 GMT-4",
+        "24 Mar 2025 at 08:30 GMT-4",
       );
       expect(fmtMedium(mockZoned, { locales: "es-ES" })).toBe(
         "24 mar 2025, 8:30 GMT-4",
@@ -228,10 +228,10 @@ describe("fmtMedium()", () => {
 
     it("formats across multiple locales", () => {
       expect(fmtMedium(mockInstant, { locales: "en-US" })).toBe(
-        "Mar 24, 2025, 6:30 AM UTC",
+        "Mar 24, 2025 at 6:30 AM UTC",
       );
       expect(fmtMedium(mockInstant, { locales: "en-GB" })).toBe(
-        "24 Mar 2025, 06:30 UTC",
+        "24 Mar 2025 at 06:30 UTC",
       );
       expect(fmtMedium(mockInstant, { locales: "es-ES" })).toBe(
         "24 mar 2025, 6:30 UTC",
@@ -341,7 +341,7 @@ describe("fmtFull()", () => {
         "lunes, 24 de marzo de 2025",
       );
       expect(fmtFull(mockDate, { locales: "zh-CN" })).toBe(
-        "2025年3月24日星期一",
+        "2025年3月24日 星期一",
       );
     });
   });
@@ -371,7 +371,7 @@ describe("fmtFull()", () => {
         "lunes, 24 de marzo de 2025, 8:30:05",
       );
       expect(fmtFull(mockDateTime, { locales: "zh-CN" })).toBe(
-        "2025年3月24日星期一 08:30:05",
+        "2025年3月24日 星期一 08:30:05",
       );
     });
   });
@@ -390,7 +390,7 @@ describe("fmtFull()", () => {
         "lunes, 24 de marzo de 2025, 8:30:05 (hora de verano oriental)",
       );
       expect(fmtFull(mockZoned, { locales: "zh-CN" })).toBe(
-        "2025年3月24日星期一 北美东部夏令时间 08:30:05",
+        "2025年3月24日 星期一 北美东部夏令时间 08:30:05",
       );
     });
   });
@@ -409,7 +409,7 @@ describe("fmtFull()", () => {
         "lunes, 24 de marzo de 2025, 6:30:05 (tiempo universal coordinado)",
       );
       expect(fmtFull(mockInstant, { locales: "zh-CN" })).toBe(
-        "2025年3月24日星期一 协调世界时 06:30:05",
+        "2025年3月24日 星期一 协调世界时 06:30:05",
       );
     });
   });

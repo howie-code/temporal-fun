@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach } from "bun:test";
 import { Zoned } from "./types";
 import { isValidTimezone, getTimezoneName, getGMTOffset } from "./timezone.js";
 import * as config from "./config";

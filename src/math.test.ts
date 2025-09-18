@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect } from "bun:test";
 import { Temporal } from "temporal-polyfill";
 
 const END_OF_DAY_TIME = {
