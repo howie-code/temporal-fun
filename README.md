@@ -41,8 +41,8 @@ if (isDateTime(parsed)) {
 }
 
 // Format dates
-fmtShort(plainDate, { locales: 'en-US' })    // "1/15/24"
-fmtRelativeToNow(zonedDateTime, { locales: 'en-US' }) // "2 days ago"
+fmtShort(plainDate, 'en-US')    // "1/15/24"
+fmtRelativeToNow(zonedDateTime, 'en-US') // "2 days ago"
 
 // Date math
 const weekStart = startOfWeek(zonedDateTime, 1); // Monday start
@@ -181,7 +181,7 @@ const d = date("2025-03-20");
 setLocales('en-US');  // Sets the default locale
 startOfWeek(d)        // Uses Sunday as start-of-week (based on default locale)
 fmtShort(d)           // Uses en-US locale (based on default locale)
-fmtShort(d, { locales: 'en-GB' })  // Overrides the default locale
+fmtShort(d, 'en-GB')  // Overrides the default locale
 ```
 
 ### 📊 Comparison
@@ -259,12 +259,12 @@ Note: The installed ICU/locales can affect this formatting, especially for loose
 import { fmtRelativeToNow, fmtShort, fmtMedium, fmtLong } from 'temporal-fun';
 
 // Relative formatting
-fmtRelativeToNow(date, { locales: 'en-US' }); // "2 days ago"
+fmtRelativeToNow(date, 'en-US'); // "2 days ago"
 
 // Short/medium/long formatting helpers
-fmtShort(date, { locales: 'en-US' });        // "3/24/25"
-fmtMedium(date, { locales: 'en-US' });       // "Mar 24, 2025"
-fmtLong(dateTime, { locales: 'en-US' });     // "March 24, 2025 at 8:30 AM"
+fmtShort(date, 'en-US');        // "3/24/25"
+fmtMedium(date, 'en-US');       // "Mar 24, 2025"
+fmtLong(dateTime, 'en-US');     // "March 24, 2025 at 8:30 AM"
 fmtFull(dateTime, { locales: 'en-US'});      // "Monday, March 24, 2025 at 8:30:05 AM"
 ```
 

@@ -1,12 +1,15 @@
 import type { WeekStartsOn } from "./types";
 
-let defaultLocales: string | string[] | undefined;
+let defaultLocales: Intl.LocalesArgument | undefined;
 let defaultWeekStart: WeekStartsOn = 7; // Sunday
 
-export function setLocales(locales: string | string[]) {
+export function setLocales(locales: Intl.LocalesArgument) {
   defaultLocales = locales;
-  const firstLocale = typeof locales === "string" ? locales : locales[0];
-  if (!firstLocale) return;
+  const firstLocale = Array.isArray(locales) ? locales[0] : locales;
+  if (!firstLocale) {
+    defaultLocales = undefined;
+    return;
+  }
 
   const loc = new Intl.Locale(firstLocale);
 

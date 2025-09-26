@@ -51,7 +51,7 @@ export function fmtRelativeToNow(
 //
 // This works by using formatToParts with a locale-aware hour + timezone format.
 // We then find the timeZoneName component and determine if there is a literal separator part before it.
-function getLocaleTimeZoneJoiner(locales?: string | string[]): string {
+function getLocaleTimeZoneJoiner(locales?: Intl.LocalesArgument): string {
   // Include hour to ensure the timezone actually appears after a time part
   const parts = new Intl.DateTimeFormat(locales, {
     hour: "numeric",
@@ -70,8 +70,9 @@ function getLocaleTimeZoneJoiner(locales?: string | string[]): string {
   return ""; // no separator
 }
 
-export function fmtShort(dl: DateLike | TimeLike, opts?: { locales?: string | string[] }): string {
-  const { locales = config.getLocales() } = opts || {};
+export function fmtShort(dl: DateLike | TimeLike, locales?: Intl.LocalesArgument): string {
+  const loc = locales ?? config.getLocales();
+  const locStr = loc?.toString();
 
   const fmtOpts: Intl.DateTimeFormatOptions = {};
   if (isDateLike(dl)) fmtOpts.dateStyle = "short";
@@ -79,16 +80,18 @@ export function fmtShort(dl: DateLike | TimeLike, opts?: { locales?: string | st
   if (isInstant(dl)) fmtOpts.timeZone = "UTC";
 
   if (!isZoned(dl) && !isInstant(dl)) {
-    return dl.toLocaleString(locales, fmtOpts);
+    return dl.toLocaleString(locStr, fmtOpts);
   }
 
-  const dtString = dl.toLocaleString(locales, fmtOpts);
-  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales, style: "short" }) : "UTC";
-  return tzName ? [dtString, getLocaleTimeZoneJoiner(locales), tzName].join("") : dtString;
+  const dtString = dl.toLocaleString(locStr, fmtOpts);
+  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales: loc, style: "short" }) : "UTC";
+  return tzName ? [dtString, getLocaleTimeZoneJoiner(loc), tzName].join("") : dtString;
 }
 
-export function fmtMedium(dl: DateLike | TimeLike, opts?: { locales?: string | string[] }): string {
-  const { locales = config.getLocales() } = opts || {};
+export function fmtMedium(dl: DateLike | TimeLike, locales?: Intl.LocalesArgument): string {
+  const loc = locales ?? config.getLocales();
+  const locStr = loc?.toString();
+
   const fmtOpts = {} as Intl.DateTimeFormatOptions;
   if (isDateLike(dl)) {
     fmtOpts.dateStyle = "medium";
@@ -101,16 +104,18 @@ export function fmtMedium(dl: DateLike | TimeLike, opts?: { locales?: string | s
   }
 
   if (!isZoned(dl) && !isInstant(dl)) {
-    return dl.toLocaleString(locales, fmtOpts);
+    return dl.toLocaleString(locStr, fmtOpts);
   }
 
-  const dtString = dl.toLocaleString(locales, fmtOpts);
-  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales, style: "short" }) : "UTC";
-  return tzName ? [dtString, getLocaleTimeZoneJoiner(locales), tzName].join("") : dtString;
+  const dtString = dl.toLocaleString(locStr, fmtOpts);
+  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales: loc, style: "short" }) : "UTC";
+  return tzName ? [dtString, getLocaleTimeZoneJoiner(loc), tzName].join("") : dtString;
 }
 
-export function fmtLong(dl: DateLike | TimeLike, opts?: { locales?: string | string[] }): string {
-  const { locales = config.getLocales() } = opts || {};
+export function fmtLong(dl: DateLike | TimeLike, locales?: Intl.LocalesArgument): string {
+  const loc = locales ?? config.getLocales();
+  const locStr = loc?.toString();
+
   const fmtOpts = {} as Intl.DateTimeFormatOptions;
   if (isDateLike(dl)) {
     fmtOpts.dateStyle = "long";
@@ -120,20 +125,22 @@ export function fmtLong(dl: DateLike | TimeLike, opts?: { locales?: string | str
   }
 
   if (!isZoned(dl) && !isInstant(dl)) {
-    return dl.toLocaleString(locales, fmtOpts);
+    return dl.toLocaleString(locStr, fmtOpts);
   }
 
   if (isInstant(dl)) {
     fmtOpts.timeZone = "UTC";
   }
 
-  const dtString = dl.toLocaleString(locales, fmtOpts);
-  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales, style: "long" }) : "UTC";
-  return tzName ? [dtString, getLocaleTimeZoneJoiner(locales), tzName].join("") : dtString;
+  const dtString = dl.toLocaleString(locStr, fmtOpts);
+  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales: loc, style: "long" }) : "UTC";
+  return tzName ? [dtString, getLocaleTimeZoneJoiner(loc), tzName].join("") : dtString;
 }
 
-export function fmtFull(dl: DateLike | TimeLike, opts?: { locales?: string | string[] }): string {
-  const { locales = config.getLocales() } = opts || {};
+export function fmtFull(dl: DateLike | TimeLike, locales?: Intl.LocalesArgument): string {
+  const loc = locales ?? config.getLocales();
+  const locStr = loc?.toString();
+
   const fmtOpts = {} as Intl.DateTimeFormatOptions;
   if (isDateLike(dl)) {
     fmtOpts.dateStyle = "full";
@@ -145,5 +152,5 @@ export function fmtFull(dl: DateLike | TimeLike, opts?: { locales?: string | str
     fmtOpts.timeZone = "UTC";
   }
 
-  return dl.toLocaleString(locales, fmtOpts);
+  return dl.toLocaleString(locStr, fmtOpts);
 }

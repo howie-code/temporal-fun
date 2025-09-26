@@ -87,10 +87,10 @@ describe("fmtShort()", () => {
     const mockDate = PlainDate.from("2025-03-24");
 
     it("formats across multiple locales", () => {
-      expect(fmtShort(mockDate, { locales: "en-US" })).toBe("3/24/25");
-      expect(fmtShort(mockDate, { locales: "en-GB" })).toBe("24/03/2025");
-      expect(fmtShort(mockDate, { locales: "es-ES" })).toBe("24/3/25");
-      expect(fmtShort(mockDate, { locales: "zh-CN" })).toBe("2025/3/24");
+      expect(fmtShort(mockDate, "en-US")).toBe("3/24/25");
+      expect(fmtShort(mockDate, "en-GB")).toBe("24/03/2025");
+      expect(fmtShort(mockDate, "es-ES")).toBe("24/3/25");
+      expect(fmtShort(mockDate, "zh-CN")).toBe("2025/3/24");
     });
   });
 
@@ -98,10 +98,10 @@ describe("fmtShort()", () => {
     const mockTime = PlainTime.from("08:30:05");
 
     it("formats across multiple locales", () => {
-      expect(fmtShort(mockTime, { locales: "en-US" })).toBe("8:30 AM");
-      expect(fmtShort(mockTime, { locales: "en-GB" })).toBe("08:30");
-      expect(fmtShort(mockTime, { locales: "es-ES" })).toBe("8:30");
-      expect(fmtShort(mockTime, { locales: "zh-CN" })).toBe("08:30");
+      expect(fmtShort(mockTime, "en-US")).toBe("8:30 AM");
+      expect(fmtShort(mockTime, "en-GB")).toBe("08:30");
+      expect(fmtShort(mockTime, "es-ES")).toBe("8:30");
+      expect(fmtShort(mockTime, "zh-CN")).toBe("08:30");
     });
   });
 
@@ -109,10 +109,10 @@ describe("fmtShort()", () => {
     const mockDateTime = PlainDateTime.from("2025-03-24T08:30:05");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtShort(mockDateTime, { locales: "en-US" }), ["3/24/25", "8:30 AM"]);
-      expectFormatParts(fmtShort(mockDateTime, { locales: "en-GB" }), ["24/03/2025", "08:30"]);
-      expectFormatParts(fmtShort(mockDateTime, { locales: "es-ES" }), ["24/3/25", "8:30"]);
-      expectFormatParts(fmtShort(mockDateTime, { locales: "zh-CN" }), ["2025/3/24", "08:30"]);
+      expectFormatParts(fmtShort(mockDateTime, "en-US"), ["3/24/25", "8:30 AM"]);
+      expectFormatParts(fmtShort(mockDateTime, "en-GB"), ["24/03/2025", "08:30"]);
+      expectFormatParts(fmtShort(mockDateTime, "es-ES"), ["24/3/25", "8:30"]);
+      expectFormatParts(fmtShort(mockDateTime, "zh-CN"), ["2025/3/24", "08:30"]);
     });
   });
 
@@ -120,14 +120,10 @@ describe("fmtShort()", () => {
     const mockZoned = Zoned.from("2025-03-24T08:30:05[America/New_York]");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtShort(mockZoned, { locales: "en-US" }), ["3/24/25", "8:30 AM", "EDT"]);
-      expectFormatParts(fmtShort(mockZoned, { locales: "en-GB" }), [
-        "24/03/2025",
-        "08:30",
-        "GMT-4",
-      ]);
-      expectFormatParts(fmtShort(mockZoned, { locales: "es-ES" }), ["24/3/25", "8:30", "GMT-4"]);
-      expectFormatParts(fmtShort(mockZoned, { locales: "zh-CN" }), ["2025/3/24", "08:30", "GMT-4"]);
+      expectFormatParts(fmtShort(mockZoned, "en-US"), ["3/24/25", "8:30 AM", "EDT"]);
+      expectFormatParts(fmtShort(mockZoned, "en-GB"), ["24/03/2025", "08:30", "GMT-4"]);
+      expectFormatParts(fmtShort(mockZoned, "es-ES"), ["24/3/25", "8:30", "GMT-4"]);
+      expectFormatParts(fmtShort(mockZoned, "zh-CN"), ["2025/3/24", "08:30", "GMT-4"]);
     });
   });
 
@@ -135,14 +131,10 @@ describe("fmtShort()", () => {
     const mockInstant = Instant.from("2025-03-24T06:30:05Z");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtShort(mockInstant, { locales: "en-US" }), ["3/24/25", "6:30 AM", "UTC"]);
-      expectFormatParts(fmtShort(mockInstant, { locales: "en-GB" }), [
-        "24/03/2025",
-        "06:30",
-        "UTC",
-      ]);
-      expectFormatParts(fmtShort(mockInstant, { locales: "es-ES" }), ["24/3/25", "6:30", "UTC"]);
-      expectFormatParts(fmtShort(mockInstant, { locales: "zh-CN" }), ["2025/3/24", "06:30", "UTC"]);
+      expectFormatParts(fmtShort(mockInstant, "en-US"), ["3/24/25", "6:30 AM", "UTC"]);
+      expectFormatParts(fmtShort(mockInstant, "en-GB"), ["24/03/2025", "06:30", "UTC"]);
+      expectFormatParts(fmtShort(mockInstant, "es-ES"), ["24/3/25", "6:30", "UTC"]);
+      expectFormatParts(fmtShort(mockInstant, "zh-CN"), ["2025/3/24", "06:30", "UTC"]);
     });
   });
 });
@@ -152,10 +144,10 @@ describe("fmtMedium()", () => {
     const mockDate = PlainDate.from("2025-03-24");
 
     it("formats across multiple locales", () => {
-      expect(fmtMedium(mockDate, { locales: "en-US" })).toBe("Mar 24, 2025");
-      expect(fmtMedium(mockDate, { locales: "en-GB" })).toBe("24 Mar 2025");
-      expect(fmtMedium(mockDate, { locales: "es-ES" })).toBe("24 mar 2025");
-      expect(fmtMedium(mockDate, { locales: "zh-CN" })).toBe("2025年3月24日");
+      expect(fmtMedium(mockDate, "en-US")).toBe("Mar 24, 2025");
+      expect(fmtMedium(mockDate, "en-GB")).toBe("24 Mar 2025");
+      expect(fmtMedium(mockDate, "es-ES")).toBe("24 mar 2025");
+      expect(fmtMedium(mockDate, "zh-CN")).toBe("2025年3月24日");
     });
   });
 
@@ -163,10 +155,10 @@ describe("fmtMedium()", () => {
     const mockTime = PlainTime.from("08:30:05");
 
     it("formats across multiple locales", () => {
-      expect(fmtMedium(mockTime, { locales: "en-US" })).toBe("8:30:05 AM");
-      expect(fmtMedium(mockTime, { locales: "en-GB" })).toBe("08:30:05");
-      expect(fmtMedium(mockTime, { locales: "es-ES" })).toBe("8:30:05");
-      expect(fmtMedium(mockTime, { locales: "zh-CN" })).toBe("08:30:05");
+      expect(fmtMedium(mockTime, "en-US")).toBe("8:30:05 AM");
+      expect(fmtMedium(mockTime, "en-GB")).toBe("08:30:05");
+      expect(fmtMedium(mockTime, "es-ES")).toBe("8:30:05");
+      expect(fmtMedium(mockTime, "zh-CN")).toBe("08:30:05");
     });
   });
 
@@ -174,10 +166,10 @@ describe("fmtMedium()", () => {
     const mockDateTime = PlainDateTime.from("2025-03-24T08:30:05");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtMedium(mockDateTime, { locales: "en-US" }), ["Mar 24, 2025", "8:30 AM"]);
-      expectFormatParts(fmtMedium(mockDateTime, { locales: "en-GB" }), ["24 Mar 2025", "08:30"]);
-      expectFormatParts(fmtMedium(mockDateTime, { locales: "es-ES" }), ["24 mar 2025", "8:30"]);
-      expectFormatParts(fmtMedium(mockDateTime, { locales: "zh-CN" }), ["2025年3月24日", "08:30"]);
+      expectFormatParts(fmtMedium(mockDateTime, "en-US"), ["Mar 24, 2025", "8:30 AM"]);
+      expectFormatParts(fmtMedium(mockDateTime, "en-GB"), ["24 Mar 2025", "08:30"]);
+      expectFormatParts(fmtMedium(mockDateTime, "es-ES"), ["24 mar 2025", "8:30"]);
+      expectFormatParts(fmtMedium(mockDateTime, "zh-CN"), ["2025年3月24日", "08:30"]);
     });
   });
 
@@ -185,26 +177,10 @@ describe("fmtMedium()", () => {
     const mockZoned = Zoned.from("2025-03-24T08:30:05[America/New_York]");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtMedium(mockZoned, { locales: "en-US" }), [
-        "Mar 24, 2025",
-        "8:30 AM",
-        "EDT",
-      ]);
-      expectFormatParts(fmtMedium(mockZoned, { locales: "en-GB" }), [
-        "24 Mar 2025",
-        "08:30",
-        "GMT-4",
-      ]);
-      expectFormatParts(fmtMedium(mockZoned, { locales: "es-ES" }), [
-        "24 mar 2025",
-        "8:30",
-        "GMT-4",
-      ]);
-      expectFormatParts(fmtMedium(mockZoned, { locales: "zh-CN" }), [
-        "2025年3月24日",
-        "08:30",
-        "GMT-4",
-      ]);
+      expectFormatParts(fmtMedium(mockZoned, "en-US"), ["Mar 24, 2025", "8:30 AM", "EDT"]);
+      expectFormatParts(fmtMedium(mockZoned, "en-GB"), ["24 Mar 2025", "08:30", "GMT-4"]);
+      expectFormatParts(fmtMedium(mockZoned, "es-ES"), ["24 mar 2025", "8:30", "GMT-4"]);
+      expectFormatParts(fmtMedium(mockZoned, "zh-CN"), ["2025年3月24日", "08:30", "GMT-4"]);
     });
   });
 
@@ -212,26 +188,10 @@ describe("fmtMedium()", () => {
     const mockInstant = Instant.from("2025-03-24T06:30:05Z");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtMedium(mockInstant, { locales: "en-US" }), [
-        "Mar 24, 2025",
-        "6:30 AM",
-        "UTC",
-      ]);
-      expectFormatParts(fmtMedium(mockInstant, { locales: "en-GB" }), [
-        "24 Mar 2025",
-        "06:30",
-        "UTC",
-      ]);
-      expectFormatParts(fmtMedium(mockInstant, { locales: "es-ES" }), [
-        "24 mar 2025",
-        "6:30",
-        "UTC",
-      ]);
-      expectFormatParts(fmtMedium(mockInstant, { locales: "zh-CN" }), [
-        "2025年3月24日",
-        "06:30",
-        "UTC",
-      ]);
+      expectFormatParts(fmtMedium(mockInstant, "en-US"), ["Mar 24, 2025", "6:30 AM", "UTC"]);
+      expectFormatParts(fmtMedium(mockInstant, "en-GB"), ["24 Mar 2025", "06:30", "UTC"]);
+      expectFormatParts(fmtMedium(mockInstant, "es-ES"), ["24 mar 2025", "6:30", "UTC"]);
+      expectFormatParts(fmtMedium(mockInstant, "zh-CN"), ["2025年3月24日", "06:30", "UTC"]);
     });
   });
 });
@@ -241,10 +201,10 @@ describe("fmtLong()", () => {
     const mockDate = PlainDate.from("2025-03-24");
 
     it("formats across multiple locales", () => {
-      expect(fmtLong(mockDate, { locales: "en-US" })).toBe("March 24, 2025");
-      expect(fmtLong(mockDate, { locales: "en-GB" })).toBe("24 March 2025");
-      expect(fmtLong(mockDate, { locales: "es-ES" })).toBe("24 de marzo de 2025");
-      expect(fmtLong(mockDate, { locales: "zh-CN" })).toBe("2025年3月24日");
+      expect(fmtLong(mockDate, "en-US")).toBe("March 24, 2025");
+      expect(fmtLong(mockDate, "en-GB")).toBe("24 March 2025");
+      expect(fmtLong(mockDate, "es-ES")).toBe("24 de marzo de 2025");
+      expect(fmtLong(mockDate, "zh-CN")).toBe("2025年3月24日");
     });
   });
 
@@ -252,10 +212,10 @@ describe("fmtLong()", () => {
     const mockTime = PlainTime.from("08:30:05");
 
     it("formats across multiple locales", () => {
-      expect(fmtLong(mockTime, { locales: "en-US" })).toBe("8:30:05 AM");
-      expect(fmtLong(mockTime, { locales: "en-GB" })).toBe("08:30:05");
-      expect(fmtLong(mockTime, { locales: "es-ES" })).toBe("8:30:05");
-      expect(fmtLong(mockTime, { locales: "zh-CN" })).toBe("08:30:05");
+      expect(fmtLong(mockTime, "en-US")).toBe("8:30:05 AM");
+      expect(fmtLong(mockTime, "en-GB")).toBe("08:30:05");
+      expect(fmtLong(mockTime, "es-ES")).toBe("8:30:05");
+      expect(fmtLong(mockTime, "zh-CN")).toBe("08:30:05");
     });
   });
 
@@ -263,13 +223,10 @@ describe("fmtLong()", () => {
     const mockDateTime = PlainDateTime.from("2025-03-24T08:30:05");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtLong(mockDateTime, { locales: "en-US" }), ["March 24, 2025", "8:30 AM"]);
-      expectFormatParts(fmtLong(mockDateTime, { locales: "en-GB" }), ["24 March 2025", "08:30"]);
-      expectFormatParts(fmtLong(mockDateTime, { locales: "es-ES" }), [
-        "24 de marzo de 2025",
-        "8:30",
-      ]);
-      expectFormatParts(fmtLong(mockDateTime, { locales: "zh-CN" }), ["2025年3月24日", "08:30"]);
+      expectFormatParts(fmtLong(mockDateTime, "en-US"), ["March 24, 2025", "8:30 AM"]);
+      expectFormatParts(fmtLong(mockDateTime, "en-GB"), ["24 March 2025", "08:30"]);
+      expectFormatParts(fmtLong(mockDateTime, "es-ES"), ["24 de marzo de 2025", "8:30"]);
+      expectFormatParts(fmtLong(mockDateTime, "zh-CN"), ["2025年3月24日", "08:30"]);
     });
   });
 
@@ -277,22 +234,22 @@ describe("fmtLong()", () => {
     const mockZoned = Zoned.from("2025-03-24T08:30:05[America/New_York]");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtLong(mockZoned, { locales: "en-US" }), [
+      expectFormatParts(fmtLong(mockZoned, "en-US"), [
         "March 24, 2025",
         "8:30 AM",
         "Eastern Daylight Time",
       ]);
-      expectFormatParts(fmtLong(mockZoned, { locales: "en-GB" }), [
+      expectFormatParts(fmtLong(mockZoned, "en-GB"), [
         "24 March 2025",
         "08:30",
         "Eastern Daylight Time",
       ]);
-      expectFormatParts(fmtLong(mockZoned, { locales: "es-ES" }), [
+      expectFormatParts(fmtLong(mockZoned, "es-ES"), [
         "24 de marzo de 2025",
         "8:30",
         "hora de verano oriental",
       ]);
-      expectFormatParts(fmtLong(mockZoned, { locales: "zh-CN" }), [
+      expectFormatParts(fmtLong(mockZoned, "zh-CN"), [
         "2025年3月24日",
         "08:30",
         "北美东部夏令时间",
@@ -304,16 +261,10 @@ describe("fmtLong()", () => {
     const mockInstant = Instant.from("2025-03-24T06:30:05Z");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtLong(mockInstant, { locales: "en-US" }), [
-        "March 24, 2025",
-        "6:30 AM UTC",
-      ]);
-      expectFormatParts(fmtLong(mockInstant, { locales: "en-GB" }), ["24 March 2025", "06:30 UTC"]);
-      expectFormatParts(fmtLong(mockInstant, { locales: "es-ES" }), [
-        "24 de marzo de 2025",
-        "6:30 UTC",
-      ]);
-      expectFormatParts(fmtLong(mockInstant, { locales: "zh-CN" }), ["2025年3月24日", "06:30UTC"]);
+      expectFormatParts(fmtLong(mockInstant, "en-US"), ["March 24, 2025", "6:30 AM UTC"]);
+      expectFormatParts(fmtLong(mockInstant, "en-GB"), ["24 March 2025", "06:30 UTC"]);
+      expectFormatParts(fmtLong(mockInstant, "es-ES"), ["24 de marzo de 2025", "6:30 UTC"]);
+      expectFormatParts(fmtLong(mockInstant, "zh-CN"), ["2025年3月24日", "06:30UTC"]);
     });
   });
 });
@@ -323,10 +274,10 @@ describe("fmtFull()", () => {
     const mockDate = PlainDate.from("2025-03-24");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtFull(mockDate, { locales: "en-US" }), ["Monday", "March 24, 2025"]);
-      expectFormatParts(fmtFull(mockDate, { locales: "en-GB" }), ["Monday", "24 March 2025"]);
-      expectFormatParts(fmtFull(mockDate, { locales: "es-ES" }), ["lunes", "24 de marzo de 2025"]);
-      expectFormatParts(fmtFull(mockDate, { locales: "zh-CN" }), ["2025年3月24日", "星期一"]);
+      expectFormatParts(fmtFull(mockDate, "en-US"), ["Monday", "March 24, 2025"]);
+      expectFormatParts(fmtFull(mockDate, "en-GB"), ["Monday", "24 March 2025"]);
+      expectFormatParts(fmtFull(mockDate, "es-ES"), ["lunes", "24 de marzo de 2025"]);
+      expectFormatParts(fmtFull(mockDate, "zh-CN"), ["2025年3月24日", "星期一"]);
     });
   });
 
@@ -334,10 +285,10 @@ describe("fmtFull()", () => {
     const mockTime = PlainTime.from("08:30:05");
 
     it("formats across multiple locales", () => {
-      expect(fmtFull(mockTime, { locales: "en-US" })).toBe("8:30:05 AM");
-      expect(fmtFull(mockTime, { locales: "en-GB" })).toBe("08:30:05");
-      expect(fmtFull(mockTime, { locales: "es-ES" })).toBe("8:30:05");
-      expect(fmtFull(mockTime, { locales: "zh-CN" })).toBe("08:30:05");
+      expect(fmtFull(mockTime, "en-US")).toBe("8:30:05 AM");
+      expect(fmtFull(mockTime, "en-GB")).toBe("08:30:05");
+      expect(fmtFull(mockTime, "es-ES")).toBe("8:30:05");
+      expect(fmtFull(mockTime, "zh-CN")).toBe("08:30:05");
     });
   });
 
@@ -345,26 +296,14 @@ describe("fmtFull()", () => {
     const mockDateTime = PlainDateTime.from("2025-03-24T08:30:05");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtFull(mockDateTime, { locales: "en-US" }), [
-        "Monday",
-        "March 24, 2025",
-        "8:30:05 AM",
-      ]);
-      expectFormatParts(fmtFull(mockDateTime, { locales: "en-GB" }), [
-        "Monday",
-        "24 March 2025",
-        "08:30:05",
-      ]);
-      expectFormatParts(fmtFull(mockDateTime, { locales: "es-ES" }), [
+      expectFormatParts(fmtFull(mockDateTime, "en-US"), ["Monday", "March 24, 2025", "8:30:05 AM"]);
+      expectFormatParts(fmtFull(mockDateTime, "en-GB"), ["Monday", "24 March 2025", "08:30:05"]);
+      expectFormatParts(fmtFull(mockDateTime, "es-ES"), [
         "lunes",
         "24 de marzo de 2025",
         "8:30:05",
       ]);
-      expectFormatParts(fmtFull(mockDateTime, { locales: "zh-CN" }), [
-        "2025年3月24日",
-        "星期一",
-        "08:30:05",
-      ]);
+      expectFormatParts(fmtFull(mockDateTime, "zh-CN"), ["2025年3月24日", "星期一", "08:30:05"]);
     });
   });
 
@@ -372,22 +311,22 @@ describe("fmtFull()", () => {
     const mockZoned = Zoned.from("2025-03-24T08:30:05[America/New_York]");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtFull(mockZoned, { locales: "en-US" }), [
+      expectFormatParts(fmtFull(mockZoned, "en-US"), [
         "Monday",
         "March 24, 2025",
         "8:30:05 AM Eastern Daylight Time",
       ]);
-      expectFormatParts(fmtFull(mockZoned, { locales: "en-GB" }), [
+      expectFormatParts(fmtFull(mockZoned, "en-GB"), [
         "Monday",
         "24 March 2025",
         "08:30:05 Eastern Daylight Time",
       ]);
-      expectFormatParts(fmtFull(mockZoned, { locales: "es-ES" }), [
+      expectFormatParts(fmtFull(mockZoned, "es-ES"), [
         "lunes",
         "24 de marzo de 2025",
         "8:30:05 (hora de verano oriental)",
       ]);
-      expectFormatParts(fmtFull(mockZoned, { locales: "zh-CN" }), [
+      expectFormatParts(fmtFull(mockZoned, "zh-CN"), [
         "2025年3月24日",
         "星期一",
         "北美东部夏令时间 08:30:05",
@@ -399,22 +338,22 @@ describe("fmtFull()", () => {
     const mockInstant = Instant.from("2025-03-24T06:30:05Z");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtFull(mockInstant, { locales: "en-US" }), [
+      expectFormatParts(fmtFull(mockInstant, "en-US"), [
         "Monday",
         "March 24, 2025",
         "6:30:05 AM Coordinated Universal Time",
       ]);
-      expectFormatParts(fmtFull(mockInstant, { locales: "en-GB" }), [
+      expectFormatParts(fmtFull(mockInstant, "en-GB"), [
         "Monday",
         "24 March 2025",
         "06:30:05 Coordinated Universal Time",
       ]);
-      expectFormatParts(fmtFull(mockInstant, { locales: "es-ES" }), [
+      expectFormatParts(fmtFull(mockInstant, "es-ES"), [
         "lunes",
         "24 de marzo de 2025",
         "6:30:05 (tiempo universal coordinado)",
       ]);
-      expectFormatParts(fmtFull(mockInstant, { locales: "zh-CN" }), [
+      expectFormatParts(fmtFull(mockInstant, "zh-CN"), [
         "2025年3月24日",
         "星期一",
         "协调世界时 06:30:05",
