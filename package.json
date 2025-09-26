@@ -21,10 +21,11 @@
     "build": "tsup",
     "test": "bun test src/",
     "test:watch": "bun test --watch src/",
-    "typecheck": "tsc --noEmit",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write ."
+    "check": "biome format && biome check && tsc --project tsconfig.json",
+    "check:format": "biome format",
+    "check:lints": "biome check",
+    "check:types": "tsc --project tsconfig.json",
+    "format": "biome format --write && biome check --write"
   },
   "keywords": [
     "temporal",

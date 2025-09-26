@@ -13,7 +13,7 @@ import {
   time,
   Zoned,
   zoned,
-} from "../src/index.ts";
+} from "../src/index";
 
 // Create instances of each temporal type to generate test formats
 const inst = Instant.from("2025-03-20T14:30:00Z");

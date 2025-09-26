@@ -10,7 +10,7 @@ import {
   PlainDateTime,
   PlainTime,
   Zoned,
-} from "../src/index.ts";
+} from "../src/index";
 
 const pd = PlainDate.from("2025-03-24");
 const pt = PlainTime.from("08:30:05");
@@ -58,7 +58,7 @@ function generateTable(locales: string[]) {
                 : fmt === "long"
                   ? fmtLong
                   : fmtFull;
-          const formatted = fmtFn(sample.value, { locales: locale });
+          const formatted = fmtFn(sample.value, locale);
           cells.push(formatted);
         } catch {
           cells.push("*Error*");
