@@ -156,29 +156,21 @@ describe("isSameDay()", () => {
 });
 
 describe("isSameWeek()", () => {
-  it("returns true for dates in same week with default start (Sunday)", () => {
+  it("handles sunday then next saturday", () => {
     // Sunday to Saturday of same week
     const sunday = PlainDate.from("2024-01-14"); // Sunday
-    const saturday = PlainDate.from("2024-01-20"); // Saturday
-    expect(isSameWeek(sunday, saturday)).toBe(true);
-  });
-
-  it("returns false for dates in different weeks with default start", () => {
-    const saturday = PlainDate.from("2024-01-13"); // Saturday (previous week)
-    const sunday = PlainDate.from("2024-01-14"); // Sunday (new week)
-    expect(isSameWeek(saturday, sunday)).toBe(false);
-  });
-
-  it("works with custom week start (Sunday)", () => {
-    const sunday = PlainDate.from("2024-01-14"); // Sunday
-    const saturday = PlainDate.from("2024-01-20"); // Saturday
+    const saturday = PlainDate.from("2024-01-20"); // Saturday (+6 days)
     expect(isSameWeek(sunday, saturday, 0)).toBe(true);
+    expect(isSameWeek(sunday, saturday, 7)).toBe(true);
+    expect(isSameWeek(sunday, saturday, 6)).toBe(false);
   });
 
-  it("returns false for different weeks with custom week start", () => {
-    const saturday = PlainDate.from("2024-01-13"); // Saturday (previous week when week starts Sunday)
-    const sunday = PlainDate.from("2024-01-14"); // Sunday (next week when week starts Sunday)
+  it("handles saturday then subsequent sunday", () => {
+    const saturday = PlainDate.from("2024-01-13"); // Saturday
+    const sunday = PlainDate.from("2024-01-14"); // Sunday (+1 day)
     expect(isSameWeek(saturday, sunday, 0)).toBe(false);
+    expect(isSameWeek(saturday, sunday, 7)).toBe(false);
+    expect(isSameWeek(saturday, sunday, 6)).toBe(true);
   });
 
   it("works across year boundaries", () => {
@@ -193,7 +185,7 @@ describe("isSameWeek()", () => {
   it("works with different DateLike types", () => {
     const plainDate = PlainDate.from("2024-01-15");
     const plainDateTime = PlainDateTime.from("2024-01-17T10:30:00");
-    expect(isSameWeek(plainDate, plainDateTime)).toBe(true);
+    expect(isSameWeek(plainDate, plainDateTime, 0)).toBe(true);
   });
 });
 

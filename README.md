@@ -253,6 +253,8 @@ These generally follow CLDR locale-specific formatting guidance with some timezo
 - Zoned: always render a timezone
 - Instant: always render in UTC
 
+Note: The installed ICU/locales can affect this formatting, especially for loosely specified format details like separators and spacing. Do not rely on these functions to product consiste
+
 ```typescript
 import { fmtRelativeToNow, fmtShort, fmtMedium, fmtLong } from 'temporal-fun';
 
