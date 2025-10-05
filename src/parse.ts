@@ -77,12 +77,16 @@ export function parseZoned(input: string): Zoned {
       // Parse the ISO 8601 part as an Instant, and then re-apply the timezone (which may adjust the offset)
       const [, isoPart, timeZone] = input.match(/^(.*?)\[(.+)\]$/) || [];
       if (isoPart && timeZone) {
-        return Temporal.Instant.from(isoPart).toZonedDateTimeISO(timeZone);
+        // If timeZone is GMT or UTC prefixed offset, just use the offset
+        const tz = /^(GMT|UTC)[+-]/.test(timeZone)
+          ? timeZone.replace(/^(GMT|UTC)/, "")
+          : timeZone;
+        return Temporal.Instant.from(isoPart).toZonedDateTimeISO(tz);
       }
 
       // Allow parsing ISO-8601 to Zoned with UTC timezone.
       return Temporal.Instant.from(input).toZonedDateTimeISO("UTC");
-    } catch {
+    } catch (e2) {
       // rethrow the original ZonedDateTime parsing error
       throw err;
     }
