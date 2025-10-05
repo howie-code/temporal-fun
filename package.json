@@ -1,6 +1,6 @@
 {
   "name": "temporal-fun",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Modern temporal date utility library, built for Temporal API",
   "type": "module",
   "main": "./dist/index.js",
