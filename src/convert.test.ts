@@ -1,7 +1,49 @@
 import { describe, expect, it } from "bun:test";
-import { date, dateLike, dateTime, instant, timeLike, zoned } from "./convert.js";
+import { date, dateLike, dateTime, instant, now, nowZoned, timeLike, today, zoned } from "./convert.js";
 import { parseZoned } from "./parse.js";
 import { Instant, PlainDate, PlainDateTime, PlainTime, Zoned } from "./types";
+
+describe("today()", () => {
+  it("works with no args", () => {
+    const result = today();
+    expect(result).toBeInstanceOf(PlainDate);
+  });
+
+  it("is within 1 day of today('UTC')", () => {
+    const systemDate = today();
+    const utcDate = today("UTC");
+    const diff = Math.abs(systemDate.since(utcDate, { largestUnit: "day" }).days);
+    expect(diff).toBeLessThanOrEqual(1);
+  });
+
+  it("is within 1 day of today('America/Los_Angeles')", () => {
+    const systemDate = today();
+    const laDate = today("America/Los_Angeles");
+    const diff = Math.abs(systemDate.since(laDate, { largestUnit: "day" }).days);
+    expect(diff).toBeLessThanOrEqual(1);
+  });
+});
+
+describe("now()", () => {
+  it("is within a few seconds of Date.now()", () => {
+    const instant = now();
+    const dateNow = Date.now();
+    const deltaSeconds = Math.abs(instant.epochMilliseconds - dateNow) / 1000;
+    expect(deltaSeconds).toBeLessThan(5);
+  });
+});
+
+describe("nowZoned()", () => {
+  it("works with no args", () => {
+    const result = nowZoned();
+    expect(result).toBeInstanceOf(Zoned);
+  });
+
+  it("uses specified timezone", () => {
+    const result = nowZoned("America/New_York");
+    expect(result.timeZoneId).toBe("America/New_York");
+  });
+});
 
 describe("dateLike()", () => {
   it("converts string dates to PlainDate", () => {
