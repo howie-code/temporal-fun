@@ -37,6 +37,10 @@
   ],
   "author": "Anthony Nowell <anthony@howie.ai>",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/howie-code/temporal-fun.git"
+  },
   "peerDependencies": {
     "temporal-polyfill": "^0.2.5"
   },
