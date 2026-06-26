@@ -26,15 +26,22 @@ export function now(): Instant {
 /**
  * Gets the current date and time in the specified timezone
  */
-export function nowZoned(timezone?: string): Zoned {
-  return Temporal.Now.zonedDateTimeISO(timezone);
+export function nowZoned(tz?: string): Zoned {
+  return Temporal.Now.zonedDateTimeISO(tz);
 }
 
 /**
  * Gets today's date in the specified timezone (or system timezone if not provided)
  */
-export function today(timezone?: string): PlainDate {
-  return Temporal.Now.plainDateISO(timezone);
+export function today(tz?: string): PlainDate {
+  return Temporal.Now.plainDateISO(tz);
+}
+
+/**
+ * Gets the system-configured timezone id (e.g. "America/New_York")
+ */
+export function localTz(): string {
+  return Temporal.Now.timeZoneId();
 }
 
 // ============= CONVENIENCE WRAPPERS (IntoType -> Type) =============
@@ -94,32 +101,31 @@ export function dateTime(idl: IntoDateLike): PlainDateTime {
  * - Date object: converts via Instant to the target timezone (or UTC if not specified)
  * - String: parses to most relevant Temporal type, then converts as above
  */
-export function zoned(idl: IntoDateLike, timezone: string): Zoned;
-export function zoned(
-  idl: Exclude<IntoDateLike, PlainDate | PlainDateTime>,
-  timezone?: string,
-): Zoned;
-export function zoned(idl: IntoDateLike, timezone?: string): Zoned {
+export function zoned(idl: IntoDateLike, tz: string): Zoned;
+export function zoned(idl: Exclude<IntoDateLike, PlainDate | PlainDateTime>, tz?: string): Zoned;
+export function zoned(idl: IntoDateLike, tz?: string): Zoned {
   const dl = dateLike(idl);
 
   if (isZoned(dl)) {
-    return timezone ? dl.withTimeZone(timezone) : dl;
+    return tz ? dl.withTimeZone(tz) : dl;
   }
 
   if (isInstant(dl)) {
-    return dl.toZonedDateTimeISO(timezone || "UTC");
+    return dl.toZonedDateTimeISO(tz || "UTC");
   }
 
-  if (!timezone) {
-    throw new Error("Must specify timezone when calling zoned with PlainDate or PlainDateTime");
+  if (!tz) {
+    throw new Error(
+      "Must specify timezone when calling zoned with PlainDate or PlainDateTime (e.g. localTz())",
+    );
   }
 
   if (isDateTime(dl)) {
-    return dl.toZonedDateTime(timezone);
+    return dl.toZonedDateTime(tz);
   }
 
   if (isDate(dl)) {
-    return dl.toPlainDateTime({ hour: 0, minute: 0 }).toZonedDateTime(timezone);
+    return dl.toPlainDateTime({ hour: 0, minute: 0 }).toZonedDateTime(tz);
   }
 
   throw new Error(`Unsupported type for conversion to Zoned: ${constructorName(dl) ?? typeof dl}`);

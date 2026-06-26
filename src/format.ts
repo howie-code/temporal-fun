@@ -1,7 +1,7 @@
 import * as config from "./config";
 import { nowZoned, zoned } from "./convert";
 import { isDateLike, isInstant, isTimeLike, isZoned } from "./guards";
-import { getTimezoneName } from "./timezone";
+import { fmtTz } from "./timezone";
 import type { DateLike, TimeLike } from "./types";
 
 /**
@@ -84,7 +84,7 @@ export function fmtShort(dl: DateLike | TimeLike, locales?: Intl.LocalesArgument
   }
 
   const dtString = dl.toLocaleString(locStr, fmtOpts);
-  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales: loc, style: "short" }) : "UTC";
+  const tzName = isZoned(dl) ? fmtTz(dl, { locales: loc, style: "short" }) : "UTC";
   return tzName ? [dtString, getLocaleTimeZoneJoiner(loc), tzName].join("") : dtString;
 }
 
@@ -108,7 +108,7 @@ export function fmtMedium(dl: DateLike | TimeLike, locales?: Intl.LocalesArgumen
   }
 
   const dtString = dl.toLocaleString(locStr, fmtOpts);
-  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales: loc, style: "short" }) : "UTC";
+  const tzName = isZoned(dl) ? fmtTz(dl, { locales: loc, style: "short" }) : "UTC";
   return tzName ? [dtString, getLocaleTimeZoneJoiner(loc), tzName].join("") : dtString;
 }
 
@@ -133,7 +133,7 @@ export function fmtLong(dl: DateLike | TimeLike, locales?: Intl.LocalesArgument)
   }
 
   const dtString = dl.toLocaleString(locStr, fmtOpts);
-  const tzName = isZoned(dl) ? getTimezoneName(dl, { locales: loc, style: "long" }) : "UTC";
+  const tzName = isZoned(dl) ? fmtTz(dl, { locales: loc, style: "long" }) : "UTC";
   return tzName ? [dtString, getLocaleTimeZoneJoiner(loc), tzName].join("") : dtString;
 }
 

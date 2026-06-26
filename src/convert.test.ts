@@ -1,6 +1,18 @@
 import { describe, expect, it } from "bun:test";
-import { date, dateLike, dateTime, instant, now, nowZoned, timeLike, today, zoned } from "./convert.js";
+import {
+  date,
+  dateLike,
+  dateTime,
+  instant,
+  localTz,
+  now,
+  nowZoned,
+  timeLike,
+  today,
+  zoned,
+} from "./convert.js";
 import { parseZoned } from "./parse.js";
+import { isValidTz } from "./timezone.js";
 import { Instant, PlainDate, PlainDateTime, PlainTime, Zoned } from "./types";
 
 describe("today()", () => {
@@ -42,6 +54,18 @@ describe("nowZoned()", () => {
   it("uses specified timezone", () => {
     const result = nowZoned("America/New_York");
     expect(result.timeZoneId).toBe("America/New_York");
+  });
+});
+
+describe("localTz()", () => {
+  it("returns a valid system timezone id", () => {
+    const tz = localTz();
+    expect(typeof tz).toBe("string");
+    expect(isValidTz(tz)).toBe(true);
+  });
+
+  it("matches the timezone used by nowZoned() with no args", () => {
+    expect(localTz()).toBe(nowZoned().timeZoneId);
   });
 });
 

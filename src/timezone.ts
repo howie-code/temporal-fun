@@ -1,7 +1,7 @@
 import * as config from "./config";
 import type { Zoned } from "./types";
 
-export interface TimezoneFormatOptions {
+export interface TzFormatOptions {
   locales: Intl.LocalesArgument;
   style: Intl.DateTimeFormatOptions["timeZoneName"];
 }
@@ -13,9 +13,9 @@ export function getAllTimezones(): string[] {
 /**
  * Check if timezone is valid using Intl API
  */
-export function isValidTimezone(timezone: string): boolean {
+export function isValidTz(tz: string): boolean {
   try {
-    new Intl.DateTimeFormat(undefined, { timeZone: timezone });
+    new Intl.DateTimeFormat(undefined, { timeZone: tz });
     return true;
   } catch {
     return false;
@@ -26,15 +26,12 @@ export function isValidTimezone(timezone: string): boolean {
  * Get timezone name (or abbreviation) from Intl.DateTimeFormat
  * This is locale-specific and varies based on date (e.g., London is BST or GMT)
  */
-export function getTimezoneName(
-  zonedDateTime: Zoned,
-  options?: Partial<TimezoneFormatOptions>,
-): string | null {
-  const defaultOptions: TimezoneFormatOptions = {
+export function fmtTz(zonedDateTime: Zoned, options?: Partial<TzFormatOptions>): string | null {
+  const defaultOptions: TzFormatOptions = {
     locales: config.getLocales(),
     style: "short",
   };
-  const mergedOptions: TimezoneFormatOptions = {
+  const mergedOptions: TzFormatOptions = {
     ...defaultOptions,
     ...options,
   };
@@ -51,15 +48,16 @@ export function getTimezoneName(
 }
 
 /**
- * Get GMT offset string for a timezone
+ * Get GMT offset string (e.g. "GMT+5:30") for a ZonedDateTime
  */
-export function getGMTOffset(currentTimeOffsetInMinutes: number): string {
-  const hours = Math.trunc(currentTimeOffsetInMinutes / 60);
-  const minutes = Math.abs(currentTimeOffsetInMinutes) % 60;
+export function tzOffset(zdt: Zoned): string {
+  const totalMinutes = tzOffsetMinutes(zdt);
+  const hours = Math.trunc(totalMinutes / 60);
+  const minutes = Math.abs(totalMinutes) % 60;
   const sign = hours >= 0 ? "+" : "-";
   return `GMT${sign}${Math.abs(hours)}:${minutes.toString().padStart(2, "0")}`;
 }
 
-export function getTimezoneOffsetMinutes(zdt: Zoned): number {
+export function tzOffsetMinutes(zdt: Zoned): number {
   return zdt.offsetNanoseconds / (1e9 * 60);
 }

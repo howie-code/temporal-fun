@@ -116,9 +116,7 @@ describe("Parsing functions", () => {
     });
 
     it("should throw for invalid timezone strings", () => {
-      expect(() =>
-        parseZoned("2024-03-15T14:30:00[Invalid/Timezone]"),
-      ).toThrow();
+      expect(() => parseZoned("2024-03-15T14:30:00[Invalid/Timezone]")).toThrow();
       expect(() => parseZoned("invalid-zoned")).toThrow();
     });
   });
@@ -302,18 +300,12 @@ describe("Validation functions", () => {
 
   describe("isValidZonedString", () => {
     it("should validate correct ZonedDateTime strings", () => {
-      expect(isValidZonedString("2024-03-15T14:30:00[America/New_York]")).toBe(
-        true,
-      );
-      expect(
-        isValidZonedString("2024-03-15T14:30:00+05:00[Asia/Karachi]"),
-      ).toBe(true);
+      expect(isValidZonedString("2024-03-15T14:30:00[America/New_York]")).toBe(true);
+      expect(isValidZonedString("2024-03-15T14:30:00+05:00[Asia/Karachi]")).toBe(true);
     });
 
     it("should reject invalid ZonedDateTime strings", () => {
-      expect(isValidZonedString("2024-03-15T14:30:00[Invalid/Timezone]")).toBe(
-        false,
-      );
+      expect(isValidZonedString("2024-03-15T14:30:00[Invalid/Timezone]")).toBe(false);
       expect(isValidZonedString("not-a-zdt")).toBe(false);
     });
   });
