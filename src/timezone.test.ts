@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import * as config from "./config";
-import { fmtTz, isValidTz, tzOffset } from "./timezone.js";
+import { fmtTz, isValidTz, tzOffset, tzOffsetMinutes } from "./timezone.js";
 import { Zoned } from "./types";
 
 describe("isValidTz()", () => {
@@ -137,5 +137,30 @@ describe("tzOffset()", () => {
   it("handles large offsets", () => {
     expect(tzOffset(Zoned.from("2024-07-15T12:00:00[Pacific/Kiritimati]"))).toBe("GMT+14:00");
     expect(tzOffset(Zoned.from("2024-07-15T12:00:00[Etc/GMT+12]"))).toBe("GMT-12:00");
+  });
+
+  // Offset time zones exercise minute padding and the sub-hour sign edge that
+  // no IANA zone produces today.
+  it("pads single-digit minutes", () => {
+    expect(tzOffset(Zoned.from("2024-01-01T00:00:00+00:05[+00:05]"))).toBe("GMT+0:05");
+    expect(tzOffset(Zoned.from("2024-01-01T00:00:00-00:05[-00:05]"))).toBe("GMT-0:05");
+  });
+
+  it("signs sub-hour negative offsets correctly", () => {
+    expect(tzOffset(Zoned.from("2024-01-01T00:00:00-00:30[-00:30]"))).toBe("GMT-0:30");
+  });
+});
+
+describe("tzOffsetMinutes()", () => {
+  it("returns whole-minute offsets for IANA zones", () => {
+    expect(tzOffsetMinutes(Zoned.from("2024-01-15T12:00:00[UTC]"))).toBe(0);
+    expect(tzOffsetMinutes(Zoned.from("2024-01-15T12:00:00[America/New_York]"))).toBe(-300);
+    expect(tzOffsetMinutes(Zoned.from("2024-07-15T12:00:00[Asia/Kolkata]"))).toBe(330);
+    expect(tzOffsetMinutes(Zoned.from("2024-07-15T12:00:00[Asia/Kathmandu]"))).toBe(345);
+  });
+
+  it("reflects DST shifts", () => {
+    expect(tzOffsetMinutes(Zoned.from("2024-01-15T12:00:00[America/New_York]"))).toBe(-300);
+    expect(tzOffsetMinutes(Zoned.from("2024-07-15T12:00:00[America/New_York]"))).toBe(-240);
   });
 });

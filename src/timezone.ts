@@ -54,7 +54,7 @@ export function tzOffset(zdt: Zoned): string {
   const totalMinutes = tzOffsetMinutes(zdt);
   const hours = Math.trunc(totalMinutes / 60);
   const minutes = Math.abs(totalMinutes) % 60;
-  const sign = hours >= 0 ? "+" : "-";
+  const sign = totalMinutes >= 0 ? "+" : "-";
   return `GMT${sign}${Math.abs(hours)}:${minutes.toString().padStart(2, "0")}`;
 }
 
