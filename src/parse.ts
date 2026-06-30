@@ -84,7 +84,7 @@ export function parseZoned(input: string): Zoned {
 
       // Allow parsing ISO-8601 to Zoned with UTC timezone.
       return Temporal.Instant.from(input).toZonedDateTimeISO("UTC");
-    } catch (e2) {
+    } catch {
       // rethrow the original ZonedDateTime parsing error
       throw err;
     }

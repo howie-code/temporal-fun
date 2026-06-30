@@ -261,10 +261,83 @@ describe("fmtLong()", () => {
     const mockInstant = Instant.from("2025-03-24T06:30:05Z");
 
     it("formats across multiple locales", () => {
-      expectFormatParts(fmtLong(mockInstant, "en-US"), ["March 24, 2025", "6:30 AM UTC"]);
-      expectFormatParts(fmtLong(mockInstant, "en-GB"), ["24 March 2025", "06:30 UTC"]);
-      expectFormatParts(fmtLong(mockInstant, "es-ES"), ["24 de marzo de 2025", "6:30 UTC"]);
-      expectFormatParts(fmtLong(mockInstant, "zh-CN"), ["2025年3月24日", "06:30UTC"]);
+      // fmtLong uses the descriptive (long) zone name per tier, matching fmtFull —
+      // so an Instant renders UTC's long name, not the bare "UTC" abbreviation.
+      expectFormatParts(fmtLong(mockInstant, "en-US"), [
+        "March 24, 2025",
+        "6:30 AM",
+        "Coordinated Universal Time",
+      ]);
+      expectFormatParts(fmtLong(mockInstant, "en-GB"), [
+        "24 March 2025",
+        "06:30",
+        "Coordinated Universal Time",
+      ]);
+      expectFormatParts(fmtLong(mockInstant, "es-ES"), [
+        "24 de marzo de 2025",
+        "6:30",
+        "tiempo universal coordinado",
+      ]);
+      expectFormatParts(fmtLong(mockInstant, "zh-CN"), ["2025年3月24日", "06:30", "协调世界时"]);
+    });
+  });
+});
+
+// Assert structural placement and the absence of stray hour markers rather than
+// exact zone names/offsets, which drift across ICU versions.
+describe("Zoned timezone placement", () => {
+  // JST: a zone whose CLDR layout differs sharply by locale.
+  const jst = Zoned.from("2025-03-24T06:30:00[Asia/Tokyo]");
+
+  describe("zone-first locale (zh-CN places the zone between date and time)", () => {
+    it("keeps the time last with a separated zone, never appended after the time", () => {
+      for (const formatted of [
+        fmtShort(jst, "zh-CN"),
+        fmtMedium(jst, "zh-CN"),
+        fmtLong(jst, "zh-CN"),
+      ]) {
+        // Time renders last -> the zone must have been placed before it.
+        expect(formatted.endsWith("06:30")).toBe(true);
+        // A separator sits between the zone and the time (no "<zone>06:30" gluing).
+        expect(formatted).not.toMatch(/\S06:30$/);
+      }
+      // Full structure: date, then zone, then time.
+      expect(fmtLong(jst, "zh-CN")).toMatch(/^2025年3月24日 .+ 06:30$/);
+    });
+  });
+
+  describe("hour-marker locales (no stray time-unit markers spliced in)", () => {
+    it("ja-JP keeps 時 as the zone-name suffix only, not after the time", () => {
+      for (const formatted of [
+        fmtShort(jst, "ja-JP"),
+        fmtMedium(jst, "ja-JP"),
+        fmtLong(jst, "ja-JP"),
+      ]) {
+        expect(formatted).toContain("6:30 ");
+        expect(formatted).not.toContain("6:30時");
+      }
+    });
+
+    it("fi-FI does not splice the 'h' hour-unit marker after the time", () => {
+      for (const formatted of [
+        fmtShort(jst, "fi-FI"),
+        fmtMedium(jst, "fi-FI"),
+        fmtLong(jst, "fi-FI"),
+      ]) {
+        expect(formatted).toContain("klo 6.30 ");
+        expect(formatted).not.toMatch(/6\.30 h\b/);
+      }
+    });
+
+    it("hu-HU separates the zone from the time with a space", () => {
+      for (const formatted of [
+        fmtShort(jst, "hu-HU"),
+        fmtMedium(jst, "hu-HU"),
+        fmtLong(jst, "hu-HU"),
+      ]) {
+        expect(formatted).toContain("6:30 ");
+        expect(formatted).not.toMatch(/6:30h/);
+      }
     });
   });
 });
