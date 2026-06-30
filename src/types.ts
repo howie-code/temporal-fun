@@ -1,10 +1,12 @@
-import { Temporal } from "temporal-polyfill";
+import type { Temporal } from "temporal-spec";
+import { lazyConstructor } from "./temporal";
 
-export const PlainDate = Temporal.PlainDate;
-export const PlainDateTime = Temporal.PlainDateTime;
-export const Zoned = Temporal.ZonedDateTime;
-export const PlainTime = Temporal.PlainTime;
-export const Instant = Temporal.Instant;
+// Convenience re-exports of the Temporal constructors (lazy stand-ins).
+export const PlainDate = lazyConstructor("PlainDate");
+export const PlainDateTime = lazyConstructor("PlainDateTime");
+export const Zoned = lazyConstructor("ZonedDateTime");
+export const PlainTime = lazyConstructor("PlainTime");
+export const Instant = lazyConstructor("Instant");
 export type PlainDate = Temporal.PlainDate;
 export type PlainDateTime = Temporal.PlainDateTime;
 export type Zoned = Temporal.ZonedDateTime;

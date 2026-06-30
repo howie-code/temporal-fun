@@ -1,5 +1,5 @@
-import { Temporal } from "temporal-polyfill";
 import { safeParse } from "./internal";
+import { getTemporal } from "./temporal";
 import type {
   DateLike,
   Instant,
@@ -52,14 +52,14 @@ function detectTemporalType(
  * Parses a PlainDate string
  */
 export function parseDate(input: string): PlainDate {
-  return Temporal.PlainDate.from(input);
+  return getTemporal().PlainDate.from(input);
 }
 
 /**
  * Parses a PlainDateTime string
  */
 export function parseDateTime(input: string): PlainDateTime {
-  return Temporal.PlainDateTime.from(input);
+  return getTemporal().PlainDateTime.from(input);
 }
 
 /**
@@ -69,7 +69,7 @@ export function parseDateTime(input: string): PlainDateTime {
  */
 export function parseZoned(input: string): Zoned {
   try {
-    return Temporal.ZonedDateTime.from(input);
+    return getTemporal().ZonedDateTime.from(input);
   } catch (err) {
     try {
       // Fix cases where offset and timezone combination are invalid
@@ -79,11 +79,11 @@ export function parseZoned(input: string): Zoned {
       if (isoPart && timeZone) {
         // If timeZone is GMT or UTC prefixed offset, just use the offset
         const tz = /^(GMT|UTC)[+-]/.test(timeZone) ? timeZone.replace(/^(GMT|UTC)/, "") : timeZone;
-        return Temporal.Instant.from(isoPart).toZonedDateTimeISO(tz);
+        return getTemporal().Instant.from(isoPart).toZonedDateTimeISO(tz);
       }
 
       // Allow parsing ISO-8601 to Zoned with UTC timezone.
-      return Temporal.Instant.from(input).toZonedDateTimeISO("UTC");
+      return getTemporal().Instant.from(input).toZonedDateTimeISO("UTC");
     } catch {
       // rethrow the original ZonedDateTime parsing error
       throw err;
@@ -102,7 +102,7 @@ export function parseTime(timeStr: string): PlainTime {
   }
 
   // Try ISO time format (e.g., "14:30")
-  return Temporal.PlainTime.from(timeStr);
+  return getTemporal().PlainTime.from(timeStr);
 }
 
 /**
@@ -133,14 +133,14 @@ function parseTimeFrom12Hour(time: string): PlainTime {
     hour24 = 0;
   }
 
-  return Temporal.PlainTime.from({ hour: hour24, minute });
+  return getTemporal().PlainTime.from({ hour: hour24, minute });
 }
 
 /**
  * Parses an Instant string
  */
 export function parseInstant(input: string): Instant {
-  return Temporal.Instant.from(input);
+  return getTemporal().Instant.from(input);
 }
 
 /**
@@ -161,7 +161,7 @@ export function parseDateLike(input: string): DateLike {
     case "iso-with-offset": {
       // Parse as Instant first, then create Zoned with offset timezone
       // Because Instant can parse offsets, but doesn't store them
-      const instant = Temporal.Instant.from(input);
+      const instant = getTemporal().Instant.from(input);
       const offsetMatch = input.match(/([+-]\d{2}:\d{2})$/);
       if (!offsetMatch || !offsetMatch[1]) {
         throw new Error(`Expected timezone offset in string: ${input}`);
@@ -189,7 +189,7 @@ export function parseTimeLike(input: string): TimeLike {
     case "instant":
       return parseInstant(input);
     case "iso-with-offset": {
-      const instant = Temporal.Instant.from(input);
+      const instant = getTemporal().Instant.from(input);
       const offsetMatch = input.match(/([+-]\d{2}:\d{2})$/);
       if (!offsetMatch || !offsetMatch[1]) {
         throw new Error(`Expected timezone offset in string: ${input}`);

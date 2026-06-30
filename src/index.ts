@@ -6,5 +6,6 @@ export * from "./guards";
 export * from "./json";
 export * from "./math";
 export * from "./parse";
+export { configure, getTemporal, type TemporalImpl } from "./temporal";
 export * from "./timezone";
 export * from "./types";

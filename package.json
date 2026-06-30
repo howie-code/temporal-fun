@@ -9,9 +9,18 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "module-sync": "./dist/index.js",
       "import": "./dist/index.js"
     },
+    "./polyfill": {
+      "types": "./dist/polyfill.d.ts",
+      "module-sync": "./dist/polyfill.js",
+      "import": "./dist/polyfill.js"
+    },
     "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=22"
   },
   "files": [
     "dist/**/*",
@@ -41,13 +50,22 @@
     "type": "git",
     "url": "git+https://github.com/howie-code/temporal-fun.git"
   },
+  "dependencies": {
+    "temporal-spec": "^1.0.0"
+  },
   "peerDependencies": {
-    "temporal-polyfill": "^0.2.5"
+    "temporal-polyfill": ">=0.2.5 || ^1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "temporal-polyfill": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.6",
     "@types/bun": "^1.2.22",
     "expect-type": "^1.2.2",
+    "temporal-polyfill": "^1.0.1",
     "tsup": "^7.3.0",
     "typescript": "^5.9.2"
   }
