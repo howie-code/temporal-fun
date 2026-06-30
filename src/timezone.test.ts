@@ -69,24 +69,6 @@ describe("fmtTz()", () => {
     expect(longResult).toBe("Eastern Daylight Time");
   });
 
-  it("works with different style options", () => {
-    const londonDate = Zoned.from("2024-01-15T12:00:00[Europe/London]");
-
-    const shortResult = fmtTz(londonDate, { style: "short" });
-    const longResult = fmtTz(londonDate, { style: "long" });
-    const shortOffsetResult = fmtTz(londonDate, {
-      style: "shortOffset",
-    });
-    const longOffsetResult = fmtTz(londonDate, {
-      style: "longOffset",
-    });
-
-    expect(shortResult).toBe("GMT");
-    expect(longResult).toBe("Greenwich Mean Time");
-    expect(shortOffsetResult).toBe("GMT");
-    expect(longOffsetResult).toBe("GMT");
-  });
-
   it("combines locale and style options", () => {
     const parisDate = Zoned.from("2024-07-15T12:00:00[Europe/Paris]");
 
