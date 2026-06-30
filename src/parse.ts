@@ -78,9 +78,7 @@ export function parseZoned(input: string): Zoned {
       const [, isoPart, timeZone] = input.match(/^(.*?)\[(.+)\]$/) || [];
       if (isoPart && timeZone) {
         // If timeZone is GMT or UTC prefixed offset, just use the offset
-        const tz = /^(GMT|UTC)[+-]/.test(timeZone)
-          ? timeZone.replace(/^(GMT|UTC)/, "")
-          : timeZone;
+        const tz = /^(GMT|UTC)[+-]/.test(timeZone) ? timeZone.replace(/^(GMT|UTC)/, "") : timeZone;
         return Temporal.Instant.from(isoPart).toZonedDateTimeISO(tz);
       }
 

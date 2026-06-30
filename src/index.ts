@@ -7,5 +7,4 @@ export * from "./json";
 export * from "./math";
 export * from "./parse";
 export * from "./timezone";
-export * from "./timezone";
 export * from "./types";

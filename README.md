@@ -81,13 +81,15 @@ type TimeLike = PlainTime | PlainDateTime | Zoned | Instant;  // Types with time
 ### 👷 Constructing
 
 ```typescript
-import { now, today, nowZoned, PlainDate, PlainDateTime, Instant, Time, Zoned } from 'temporal-fun';
+import { now, today, nowZoned, localTz, zoned, PlainDate, PlainDateTime, Instant, Time, Zoned } from 'temporal-fun';
 
 // Current time functions
 today();                         // → PlainDate (today)
 today('America/New_York');       // → PlainDate (current date in New York)
 now();                           // → Instant (current)
 nowZoned('America/New_York');    // → ZonedDateTime (now in New York)
+localTz();                       // → string (system timezone id, e.g. "America/New_York")
+zoned(now(), localTz());         // → ZonedDateTime (now in the system timezone)
 
 // Temporal constructors
 PlainDate(year, month, day)
@@ -296,22 +298,22 @@ Note: The installed ICU/locales can affect this formatting, especially for loose
 Work with timezones and timezone information.
 
 ```typescript
-import { getAllTimezones, isValidTimezone, getTimezoneName, getGMTOffset } from 'temporal-fun';
+import { getAllTimezones, isValidTz, fmtTz, tzOffset, tzOffsetMinutes } from 'temporal-fun';
 
 // Get all available timezones
 getAllTimezones();                          // Array of IANA timezone strings
 
 // Validate timezone
-isValidTimezone('America/New_York');        // true
-isValidTimezone('Invalid/Zone');            // false
+isValidTz('America/New_York');              // true
+isValidTz('Invalid/Zone');                  // false
 
 // Get timezone display name
-getTimezoneName(zonedDateTime);             // "EST" or "EDT" (depends on date)
-getTimezoneName(zonedDateTime, { style: 'long', locale: 'en-US' }); // "Eastern Standard Time"
+fmtTz(zonedDateTime);                       // "EST" or "EDT" (depends on date)
+fmtTz(zonedDateTime, { style: 'long', locales: 'en-US' }); // "Eastern Standard Time"
 
-// Format GMT offset
-getGMTOffset(300);                          // "GMT+5:00" (300 minutes = 5 hours)
-getGMTOffset(-330);                         // "GMT-5:30" (India offset)
+// Get GMT offset
+tzOffset(zonedDateTime);                    // "GMT+5:30" (depends on zone/date)
+tzOffsetMinutes(zonedDateTime);             // 330 (offset in minutes)
 ```
 
 ### ✅ Validation
