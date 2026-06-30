@@ -1,7 +1,7 @@
-import { Temporal } from "temporal-polyfill";
 import { isDate, isDateTime, isInstant, isTime, isZoned } from "./guards.js";
 import { constructorName } from "./internal.js";
 import { parseDateLike, parseTimeLike } from "./parse.js";
+import { getTemporal } from "./temporal.js";
 import {
   type DateLike,
   Instant,
@@ -20,28 +20,28 @@ import {
  * Gets the current instant in time
  */
 export function now(): Instant {
-  return Temporal.Now.instant();
+  return getTemporal().Now.instant();
 }
 
 /**
  * Gets the current date and time in the specified timezone
  */
 export function nowZoned(tz?: string): Zoned {
-  return Temporal.Now.zonedDateTimeISO(tz);
+  return getTemporal().Now.zonedDateTimeISO(tz);
 }
 
 /**
  * Gets today's date in the specified timezone (or system timezone if not provided)
  */
 export function today(tz?: string): PlainDate {
-  return Temporal.Now.plainDateISO(tz);
+  return getTemporal().Now.plainDateISO(tz);
 }
 
 /**
  * Gets the system-configured timezone id (e.g. "America/New_York")
  */
 export function localTz(): string {
-  return Temporal.Now.timeZoneId();
+  return getTemporal().Now.timeZoneId();
 }
 
 // ============= CONVENIENCE WRAPPERS (IntoType -> Type) =============

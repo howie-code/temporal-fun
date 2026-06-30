@@ -1,0 +1,7 @@
+# Install a global Temporal before the test suite runs (path B). This mirrors how a
+# non-native consumer sets up temporal-fun: `import "temporal-polyfill/global"` once
+# at entry. Matrix scenarios that need a clean environment (no global / configure /
+# simulated-native) spawn their own subprocess via `bun run`, which does NOT apply
+# this preload.
+[test]
+preload = ["./src/__setup__/installGlobalTemporal.ts"]

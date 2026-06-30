@@ -5,20 +5,28 @@ A modern date utility library for working with the [Temporal API](https://tc39.e
 ## Features
 
 - 🌟 **Temporal Native**: Built specifically for the modern Temporal API
-- 🔒 **Pure Functions**: All functions are immutable and side-effect free
+- 🔒 **Immutable & pure**: date/time operations return new values with no side effects.
 - 📝 **TypeScript First**: Fully typed with excellent LSP support
 - ⚡ **Concise API**: Short names for the most common functionality (e.g. `date("2025-08-28")`)
-- 💪 **Zero Dependencies**: Only requires `temporal-polyfill` as a peer dependency
+- 💪 **Zero runtime dependencies**: Uses native `Temporal` when available. Optionally supports `temporal-polyfill`. Single types-only `temporal-spec` build dep.
 
 ## Installation
 
 ```bash
-npm install --save temporal-fun temporal-polyfill
+# With the polyfill (runtimes without native Temporal):
+npm install temporal-fun temporal-polyfill
+
+# Native Temporal only:
+npm install temporal-fun
 ```
+
+temporal-fun reads `Temporal` from `globalThis.Temporal` or an implementation you inject.
+See [INSTALLATION.md](INSTALLATION.md) for configuring native vs. polyfilled Temporal.
 
 ## Quick Start
 
 ```typescript
+// For polyfill usage, import "temporal-polyfill/global" once in your app entry (see INSTALLATION.md for other polyfill setup options)
 import { date, dateTime, zoned, dateLike, isDateTime, fmtRelativeToNow, fmtShort, now, startOfWeek, today } from 'temporal-fun';
 
 // Parse & convert
@@ -60,16 +68,13 @@ Throughout this library:
 - **instant** refers to `Temporal.Instant`
 - **legacy** refers to the JS built-in `Date`
 
-However, to avoid colliding with the built-in `Date` type/constructor,
-temporal-fun keeps the "Plain" prefixes **only** in the type definitions and constructor names.
+temporal-fun also re-exports Temporal types and constructors with these names for
+convenience; however, to avoid colliding with the built-in `Date` type/constructor, it
+keeps the "Plain" prefixes **only** in the type definitions and constructor names:
 
 ```typescript
 // Constructor & type aliases
-const PlainDate = Temporal.PlainDate;
-const PlainDateTime = Temporal.PlainDateTime;
-const Zoned = Temporal.ZonedDateTime;
-const PlainTime = Temporal.PlainTime;
-const Instant = Temporal.Instant;
+import { PlainDate, PlainDateTime, Zoned, PlainTime, Instant } from "temporal-fun";
 
 // Union types
 type DateLike = PlainDate | PlainDateTime | Zoned | Instant;  // Types with date component
@@ -89,7 +94,7 @@ today('America/New_York');       // → PlainDate (current date in New York)
 now();                           // → Instant (current)
 nowZoned('America/New_York');    // → ZonedDateTime (now in New York)
 localTz();                       // → string (system timezone id, e.g. "America/New_York")
-zoned(now(), localTz());         // → ZonedDateTime (now in the system timezone)
+nowZoned(localTz());             // → ZonedDateTime (now in the system timezone)
 
 // Temporal constructors
 PlainDate(year, month, day)

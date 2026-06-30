@@ -1,8 +1,9 @@
-import { Temporal } from "temporal-polyfill";
+import type { Temporal } from "temporal-spec";
 import { compare } from "./compare";
 import * as config from "./config";
 import { isDate, isDateLike, isDateTime, isInstant, isTimeLike, isZoned } from "./guards";
 import { type Concrete, constructorName, uncheckedCompare } from "./internal";
+import { getTemporal } from "./temporal";
 import type {
   DateLike,
   Instant,
@@ -13,6 +14,11 @@ import type {
   WeekStartsOn,
   Zoned,
 } from "./types";
+
+/** A singular date or time unit (e.g. "day", "minute"). */
+type DateTimeUnit = Temporal.DateUnit | Temporal.TimeUnit;
+/** A unit accepted as a rounding `smallestUnit` — singular or plural form. */
+type AnyRoundingUnit<U extends DateTimeUnit> = Temporal.PluralizeUnit<U>;
 
 const MIN_TIME = {
   hour: 0,
@@ -273,7 +279,7 @@ export function endOfYear<T extends DateLike>(datelike: T): T {
   throw new Error(`Unsupported DateLike type: ${typeof datelike}`);
 }
 
-function singularUnit<T extends Temporal.DateTimeUnit>(unit: T | Temporal.PluralUnit<T>): T {
+function singularUnit<T extends DateTimeUnit>(unit: AnyRoundingUnit<T>): T {
   // All DateTimeUnits can be singularized without the trailing 's'
   if (unit.endsWith("s")) {
     return unit.slice(0, -1) as T;
@@ -281,20 +287,20 @@ function singularUnit<T extends Temporal.DateTimeUnit>(unit: T | Temporal.Plural
   return unit as T;
 }
 
-function isTimeUnit(unit: Temporal.DateTimeUnit): unit is Temporal.TimeUnit {
+function isTimeUnit(unit: DateTimeUnit): unit is Temporal.TimeUnit {
   return ["hour", "minute", "second", "millisecond", "microsecond", "nanosecond"].includes(unit);
 }
 
-function isDateUnit(unit: Temporal.DateTimeUnit): unit is Temporal.DateUnit {
+function isDateUnit(unit: DateTimeUnit): unit is Temporal.DateUnit {
   return ["year", "month", "week", "day"].includes(unit);
 }
 
 type RoundingUnit<T> = T extends PlainTime
-  ? Temporal.SmallestUnit<Temporal.TimeUnit>
+  ? AnyRoundingUnit<Temporal.TimeUnit>
   : T extends PlainDate
-    ? Temporal.SmallestUnit<Temporal.DateUnit>
+    ? AnyRoundingUnit<Temporal.DateUnit>
     : T extends PlainDateTime | Zoned | Instant
-      ? Temporal.SmallestUnit<Temporal.DateTimeUnit>
+      ? AnyRoundingUnit<DateTimeUnit>
       : never;
 
 /**
@@ -397,7 +403,7 @@ export function round<T extends TimeLike | DateLike>(value: T, smallestUnit: Rou
     // biome-ignore lint/suspicious/noExplicitAny: value is T
     const diff2 = value.until(ceiled as any);
 
-    return Temporal.Duration.compare(diff1, diff2) < 0 ? floored : ceiled;
+    return getTemporal().Duration.compare(diff1, diff2) < 0 ? floored : ceiled;
   }
 
   throw new Error(
