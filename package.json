@@ -68,5 +68,9 @@
     "temporal-polyfill": "^1.0.1",
     "tsup": "^7.3.0",
     "typescript": "^5.9.2"
+  },
+  "homepage": "https://github.com/howie-code/temporal-fun#readme",
+  "bugs": {
+    "url": "https://github.com/howie-code/temporal-fun/issues"
   }
 }
