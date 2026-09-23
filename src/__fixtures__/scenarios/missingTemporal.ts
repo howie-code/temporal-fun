@@ -1,4 +1,5 @@
 // Matrix row: no Temporal at all -> first use must throw. Run via `bun run` (no preload).
+import "./dropGlobalTemporal";
 import { instant, isInstant } from "../../index";
 
 try {

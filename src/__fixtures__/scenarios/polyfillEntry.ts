@@ -1,5 +1,6 @@
-// Matrix row: `import "temporal-fun/polyfill"` wires configure() without touching
+// Matrix row B: `import "temporal-fun/polyfill"` wires configure() without touching
 // globalThis. Run via `bun run` (no preload); imports source, not the built subpath.
+import "./dropGlobalTemporal";
 import "../../polyfill";
 import { instant, isInstant } from "../../index";
 

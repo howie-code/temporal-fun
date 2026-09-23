@@ -1,4 +1,5 @@
 // Matrix row C: configure() works and never touches globalThis. Run via `bun run`.
+import "./dropGlobalTemporal";
 import { Temporal } from "temporal-polyfill";
 import { configure, instant, isInstant, startOfDay } from "../../index";
 
