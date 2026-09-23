@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "bun:test";
+import { afterAll, beforeEach, describe, expect, it } from "bun:test";
 import { isSameWeek } from "./compare.js";
 import * as config from "./config.js";
 import { PlainDate } from "./types.js";
@@ -7,6 +7,12 @@ describe("temporalConfig", () => {
   beforeEach(() => {
     // Reset to default
     config.setLocales("en-US");
+  });
+
+  afterAll(() => {
+    // Config state is shared across test files.
+    config.setLocales(undefined);
+    config.setWeekStart(7);
   });
 
   it("should allow setting and getting weekStart", () => {
